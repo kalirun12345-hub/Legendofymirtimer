@@ -19,35 +19,101 @@
             background-color: var(--dark-bg);
             color: white;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0; padding: 20px;
-            display: flex; flex-direction: column; align-items: center;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
-        h1 { color: var(--gold); text-transform: uppercase; letter-spacing: 3px; margin-bottom: 30px; }
+        h1 {
+            color: var(--gold);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 30px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
 
-        .tabs { display: flex; gap: 10px; margin-bottom: 30px; flex-wrap: wrap; justify-content: center; }
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
 
         .tab-btn {
-            background: var(--card-bg); border: 1px solid var(--border); color: var(--text-gray);
-            padding: 12px 24px; cursor: pointer; border-radius: 6px; font-weight: bold; transition: 0.3s;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            color: var(--text-gray);
+            padding: 12px 24px;
+            cursor: pointer;
+            border-radius: 6px;
+            font-weight: bold;
+            transition: all 0.3s ease;
         }
 
-        .tab-btn.active { border-color: var(--gold); color: var(--gold); background: rgba(212, 175, 55, 0.1); }
+        .tab-btn.active {
+            border-color: var(--gold);
+            color: var(--gold);
+            background: rgba(212, 175, 55, 0.1);
+        }
 
-        .floor-content { display: none; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; width: 100%; max-width: 1200px; }
-        .floor-content.active { display: grid; }
+        .floor-content {
+            display: none;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 20px;
+            width: 100%;
+            max-width: 1200px;
+        }
 
-        .boss-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 20px; text-align: center; }
-        .boss-name { font-size: 1.4rem; font-weight: bold; margin-bottom: 5px; }
+        .floor-content.active {
+            display: grid;
+        }
 
-        .timer { font-size: 2.2rem; font-family: monospace; margin: 15px 0; color: var(--green); }
-        .timer.counting { color: var(--gold); }
+        .boss-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .boss-name {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #fff;
+            margin-bottom: 5px;
+        }
+
+        .timer {
+            font-size: 2.2rem;
+            font-family: 'Courier New', monospace;
+            margin: 15px 0;
+            color: var(--green);
+        }
+
+        .timer.counting {
+            color: var(--gold);
+        }
 
         .killed-btn {
-            background: transparent; border: 1px solid var(--red); color: var(--red);
-            padding: 12px; border-radius: 6px; cursor: pointer; width: 100%; font-weight: bold; transition: 0.3s;
+            background: transparent;
+            border: 1px solid var(--red);
+            color: var(--red);
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: bold;
+            text-transform: uppercase;
+            transition: 0.3s;
         }
-        .killed-btn:hover { background: var(--red); color: white; }
+
+        .killed-btn:hover {
+            background: var(--red);
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -64,11 +130,13 @@
     <div id="floors-container" style="width: 100%;"></div>
 
     <script>
+        // --- CONFIGURATION ---
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzM2yeTWYle0Ufevgdw9Q98hkhE4Crcjo6iRTAdDh_rNCpYG9XqvMPbPFj7j9WekxqA/exec"; 
         
         const bosses = ["Volva", "Berserker", "Warlord", "Skald"];
         const floors = ["floor1", "floor2", "floor3", "floor4"];
 
+        // Generate UI
         const container = document.getElementById('floors-container');
         floors.forEach((floor, fIdx) => {
             let floorDiv = document.createElement('div');
@@ -97,26 +165,32 @@
 
         async function markKilled(id, bossName, floorName) {
             const now = new Date();
-            const mins = localStorage.getItem('respawn_setting') || 120;
-            const targetTime = now.getTime() + (parseInt(mins) * 60 * 1000);
+            const setting = localStorage.getItem('respawn_setting');
+            const mins = setting ? parseInt(setting) : 120;
             
-            // Start UI Timer immediately
-            localStorage.setItem(id, targetTime);
+            // 1. CALCULATE AND SAVE TARGET TIME IMMEDIATELY
+            const targetTime = now.getTime() + (mins * 60 * 1000);
+            localStorage.setItem(id, targetTime.toString());
+            
+            // 2. FORCE UI TO UPDATE RIGHT AWAY
             updateDisplay();
 
-            // Send to Google Sheet
-            fetch(GOOGLE_SCRIPT_URL, {
-                method: 'POST',
-                mode: 'no-cors',
-                body: JSON.stringify({
-                    boss: bossName,
-                    floor: floorName,
-                    time: now.toISOString()
-                })
-            });
+            // 3. SEND TO GOOGLE SHEETS (Runs in the background)
+            if (GOOGLE_SCRIPT_URL) {
+                fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    body: JSON.stringify({
+                        boss: bossName,
+                        floor: floorName,
+                        time: now.toISOString()
+                    })
+                }).catch(err => console.log("Background sync error"));
+            }
         }
 
         function updateDisplay() {
+            const nowTime = new Date().getTime();
             floors.forEach(f => {
                 bosses.forEach(b => {
                     const id = `${f}-${b}`;
@@ -125,24 +199,31 @@
                     
                     const savedTarget = localStorage.getItem(id);
                     if (savedTarget) {
-                        const diff = parseInt(savedTarget) - new Date().getTime();
+                        const target = parseInt(savedTarget);
+                        const diff = target - nowTime;
+
                         if (diff > 0) {
                             const h = Math.floor(diff / 3600000);
                             const m = Math.floor((diff % 3600000) / 60000);
                             const s = Math.floor((diff % 60000) / 1000);
-                            display.innerHTML = `${h}h ${m}m ${s}s`;
+                            
+                            // Formats as 00h 00m 00s
+                            display.innerHTML = `${h}h ${m.toString().padStart(2, '0')}m ${s.toString().padStart(2, '0')}s`;
                             display.classList.add('counting');
                         } else {
                             display.innerHTML = "ALIVE";
                             display.classList.remove('counting');
+                            localStorage.removeItem(id); // Clean memory when done
                         }
                     }
                 });
             });
         }
 
+        // Clock loop
         setInterval(updateDisplay, 1000);
-        updateDisplay();
+        // Load existing timers on page open
+        window.onload = updateDisplay;
     </script>
 </body>
 </html>
