@@ -19,8 +19,7 @@
             background-color: var(--dark-bg);
             color: white;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 20px;
+            margin: 0; padding: 20px;
             display: flex; flex-direction: column; align-items: center;
         }
 
@@ -65,13 +64,11 @@
     <div id="floors-container" style="width: 100%;"></div>
 
     <script>
-        // --- CONFIGURATION ---
-        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyKJzHQABfWGz9DnkRT_sPx7XkEOtWvhuSE8RxwdgVepcdPqPG7bVexl1wDtFAvqZ69/exec"; 
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzM2yeTWYle0Ufevgdw9Q98hkhE4Crcjo6iRTAdDh_rNCpYG9XqvMPbPFj7j9WekxqA/exec"; 
         
         const bosses = ["Volva", "Berserker", "Warlord", "Skald"];
         const floors = ["floor1", "floor2", "floor3", "floor4"];
 
-        // Generate UI
         const container = document.getElementById('floors-container');
         floors.forEach((floor, fIdx) => {
             let floorDiv = document.createElement('div');
@@ -100,29 +97,23 @@
 
         async function markKilled(id, bossName, floorName) {
             const now = new Date();
+            const mins = localStorage.getItem('respawn_setting') || 120;
+            const targetTime = now.getTime() + (parseInt(mins) * 60 * 1000);
             
-            // 1. SET LOCAL TIMER IMMEDIATELY
-            const adminSetting = localStorage.getItem('respawn_setting');
-            const mins = adminSetting ? parseInt(adminSetting) : 120;
-            const targetTime = now.getTime() + (mins * 60 * 1000);
-            
+            // Start UI Timer immediately
             localStorage.setItem(id, targetTime);
-            updateDisplay(); // Force visual update
+            updateDisplay();
 
-            // 2. SEND TO GOOGLE (Background)
-            if (GOOGLE_SCRIPT_URL) {
-                try {
-                    fetch(GOOGLE_SCRIPT_URL, {
-                        method: 'POST',
-                        mode: 'no-cors',
-                        body: JSON.stringify({
-                            boss: bossName,
-                            floor: floorName,
-                            time: now.toISOString()
-                        })
-                    });
-                } catch (e) { console.error("Google sync failed"); }
-            }
+            // Send to Google Sheet
+            fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                body: JSON.stringify({
+                    boss: bossName,
+                    floor: floorName,
+                    time: now.toISOString()
+                })
+            });
         }
 
         function updateDisplay() {
@@ -151,7 +142,7 @@
         }
 
         setInterval(updateDisplay, 1000);
-        updateDisplay(); // Run once on load
+        updateDisplay();
     </script>
 </body>
 </html>
