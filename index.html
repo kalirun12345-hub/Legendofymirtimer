@@ -6,98 +6,22 @@
     <title>Ymir Boss Tracker Pro</title>
     <style>
         :root {
-            --gold: #d4af37;
-            --dark-bg: #0f1215;
-            --card-bg: #1c2126;
-            --border: #343b42;
-            --red: #e74c3c;
-            --green: #2ecc71;
+            --gold: #d4af37; --dark-bg: #0f1215; --card-bg: #1c2126;
+            --border: #343b42; --red: #e74c3c; --green: #2ecc71;
         }
-
-        body {
-            background-color: var(--dark-bg);
-            color: white;
-            font-family: 'Inter', -apple-system, sans-serif;
-            margin: 0;
-            padding: 20px;
-        }
-
-        h1 { text-align: center; color: var(--gold); text-transform: uppercase; letter-spacing: 2px; }
-
-        /* Tabs Styling */
-        .tabs {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-bottom: 30px;
-        }
-
-        .tab-btn {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            color: #888;
-            padding: 12px 24px;
-            cursor: pointer;
-            border-radius: 5px;
-            font-weight: bold;
-            transition: 0.3s;
-        }
-
-        .tab-btn.active {
-            border-color: var(--gold);
-            color: var(--gold);
-            background: rgba(212, 175, 55, 0.1);
-        }
-
-        /* Boss Grid */
-        .floor-content { display: none; }
-        .floor-content.active {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 20px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .boss-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 20px;
-            text-align: center;
-            transition: transform 0.2s;
-        }
-
-        .boss-card:hover { transform: translateY(-5px); border-color: #555; }
-
-        .boss-name { font-size: 1.2rem; font-weight: bold; margin-bottom: 5px; color: #eee; }
-        .floor-label { font-size: 0.8rem; color: #666; text-transform: uppercase; margin-bottom: 15px; }
-
-        .timer {
-            font-size: 2.2rem;
-            font-family: 'Courier New', monospace;
-            margin: 15px 0;
-            color: var(--green);
-        }
-
-        .timer.counting { color: var(--gold); }
-
-        button.killed-btn {
-            background: transparent;
-            border: 1px solid var(--red);
-            color: var(--red);
-            padding: 10px 20px;
-            border-radius: 6px;
-            cursor: pointer;
-            width: 100%;
-            font-weight: bold;
-            transition: 0.3s;
-        }
-
-        button.killed-btn:hover {
-            background: var(--red);
-            color: white;
-        }
+        body { background-color: var(--dark-bg); color: white; font-family: sans-serif; padding: 20px; text-align: center; }
+        .tabs { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        .tab-btn { background: var(--card-bg); border: 1px solid var(--border); color: #888; padding: 10px 20px; cursor: pointer; border-radius: 5px; }
+        .tab-btn.active { border-color: var(--gold); color: var(--gold); }
+        .floor-content { display: none; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; max-width: 1200px; margin: 0 auto; }
+        .floor-content.active { display: grid; }
+        .boss-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 15px; }
+        .boss-name { font-size: 1.2rem; font-weight: bold; color: var(--gold); }
+        .timer { font-size: 2rem; margin: 10px 0; color: var(--green); font-family: monospace; }
+        .timer.counting { color: white; }
+        button.killed-btn { background: var(--red); color: white; border: none; padding: 8px; width: 100%; border-radius: 4px; cursor: pointer; }
+        .config-section { margin-top: 50px; padding: 20px; border-top: 1px solid var(--border); }
+        input { background: #000; border: 1px solid var(--border); color: white; padding: 8px; width: 300px; border-radius: 4px; }
     </style>
 </head>
 <body>
@@ -111,46 +35,69 @@
         <button class="tab-btn" onclick="showFloor('floor4')">Floor 4</button>
     </div>
 
-    <div id="floors">
-        </div>
+    <div id="floors"></div>
+
+    <div class="config-section">
+        <h3>Webhook Settings</h3>
+        <input type="password" id="webhookInput" placeholder="Paste Discord Webhook URL here">
+        <button onclick="saveWebhook()" style="padding: 8px;">Save URL</button>
+        <p style="font-size: 0.8rem; color: #666;">URL is saved only in your browser for security.</p>
+    </div>
 
     <script>
         const bosses = ["Volva", "Berserker", "Warlord", "Skald"];
         const floors = ["floor1", "floor2", "floor3", "floor4"];
+        let sentAlerts = new Set();
 
-        // 1. Generate HTML for all floors
+        // Build UI
         const container = document.getElementById('floors');
         floors.forEach((floor, fIdx) => {
             let floorDiv = document.createElement('div');
             floorDiv.id = floor;
             floorDiv.className = `floor-content ${fIdx === 0 ? 'active' : ''}`;
-            
             bosses.forEach(boss => {
-                const bossId = `${floor}-${boss}`;
+                const id = `${floor}-${boss}`;
                 floorDiv.innerHTML += `
                     <div class="boss-card">
-                        <div class="floor-label">${floor.replace('f', 'F')}</div>
                         <div class="boss-name">${boss}</div>
-                        <div class="timer" id="time-${bossId}">ALIVE</div>
-                        <button class="killed-btn" onclick="startTimer('${bossId}', 120)">MARK KILLED</button>
-                    </div>
-                `;
+                        <div class="timer" id="time-${id}">ALIVE</div>
+                        <button class="killed-btn" onclick="startTimer('${id}', 120)">KILLED (2H)</button>
+                    </div>`;
             });
             container.appendChild(floorDiv);
         });
 
-        // 2. Tab Switching Logic
-        function showFloor(floorId) {
+        function saveWebhook() {
+            localStorage.setItem('discord_url', document.getElementById('webhookInput').value);
+            alert("Webhook Saved!");
+        }
+
+        function showFloor(id) {
             document.querySelectorAll('.floor-content').forEach(f => f.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById(floorId).classList.add('active');
+            document.getElementById(id).classList.add('active');
             event.currentTarget.classList.add('active');
         }
 
-        // 3. Timer Logic
         function startTimer(id, mins) {
             const target = new Date().getTime() + (mins * 60 * 1000);
             localStorage.setItem(id, target);
+            sentAlerts.delete(id); // Reset alert for new kill
+        }
+
+        async function sendDiscordPing(bossName, floor) {
+            const url = localStorage.getItem('discord_url');
+            if (!url) return;
+
+            const payload = {
+                content: `🚨 **@everyone BOSS ALERT** 🚨\n**${bossName}** (${floor.toUpperCase()}) will spawn in **5 MINUTES**! Get ready! ⚔️`
+            };
+
+            await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
         }
 
         function update() {
@@ -163,11 +110,17 @@
                     if (saved) {
                         const diff = saved - new Date().getTime();
                         if (diff > 0) {
-                            const h = Math.floor(diff / 3600000);
                             const m = Math.floor((diff % 3600000) / 60000);
                             const s = Math.floor((diff % 60000) / 1000);
+                            const h = Math.floor(diff / 3600000);
                             display.innerHTML = `${h}h ${m}m ${s}s`;
                             display.classList.add('counting');
+
+                            // 5 MINUTE PING LOGIC
+                            if (h === 0 && m === 5 && s === 0 && !sentAlerts.has(id)) {
+                                sendDiscordPing(b, f);
+                                sentAlerts.add(id);
+                            }
                         } else {
                             display.innerHTML = "ALIVE";
                             display.classList.remove('counting');
