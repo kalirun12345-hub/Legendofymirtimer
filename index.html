@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Ymir Boss Tracker</title>
+    <style>
+        body { background-color: #0f0f0f; color: #d4af37; font-family: 'Segoe UI', sans-serif; text-align: center; }
+        .container { display: flex; flex-wrap: wrap; justify-content: center; padding: 20px; }
+        .boss-card { background: #1a1a1a; border: 2px solid #333; border-radius: 15px; padding: 20px; margin: 10px; width: 250px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        .boss-name { font-size: 1.5rem; margin-bottom: 10px; color: #fff; text-transform: uppercase; }
+        .timer { font-size: 2rem; font-weight: bold; margin: 15px 0; color: #00ff00; }
+        button { background: #8b0000; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        button:hover { background: #ff0000; transform: scale(1.05); }
+    </style>
+</head>
+<body>
+
+    <h1>🔱 Legend of Ymir: Boss Timers 🔱</h1>
+    <div class="container">
+        <div class="boss-card">
+            <div class="boss-name">Frost Giant</div>
+            <div class="timer" id="timer1">00:00:00</div>
+            <button onclick="startTimer('timer1', 120)">KILLED (2H)</button>
+        </div>
+
+        <div class="boss-card">
+            <div class="boss-name">Ancient Drake</div>
+            <div class="timer" id="timer2">00:00:00</div>
+            <button onclick="startTimer('timer2', 240)">KILLED (4H)</button>
+        </div>
+    </div>
+
+    <script>
+        function startTimer(displayId, minutes) {
+            let targetTime = new Date().getTime() + (minutes * 60 * 1000);
+            localStorage.setItem(displayId, targetTime);
+        }
+
+        function updateDisplay() {
+            const timers = ['timer1', 'timer2'];
+            timers.forEach(id => {
+                let savedTime = localStorage.getItem(id);
+                if (savedTime) {
+                    let now = new Date().getTime();
+                    let diff = savedTime - now;
+
+                    if (diff <= 0) {
+                        document.getElementById(id).innerHTML = "ALIVE";
+                        document.getElementById(id).style.color = "#00ff00";
+                    } else {
+                        let h = Math.floor(diff / (1000 * 60 * 60));
+                        let m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                        let s = Math.floor((diff % (1000 * 60)) / 1000);
+                        document.getElementById(id).innerHTML = `${h}h ${m}m ${s}s`;
+                        document.getElementById(id).style.color = "#ffcc00";
+                    }
+                }
+            });
+        }
+        setInterval(updateDisplay, 1000);
+    </script>
+</body>
+</html>
