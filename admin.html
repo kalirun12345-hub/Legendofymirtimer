@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin - Boss Settings</title>
+    <style>
+        body { background: #0f1215; color: white; font-family: sans-serif; text-align: center; padding: 30px; }
+        .box { background: #1c2126; border: 1px solid #343b42; padding: 20px; border-radius: 10px; max-width: 400px; margin: 20px auto; }
+        input { padding: 10px; width: 80%; border-radius: 5px; border: 1px solid #d4af37; background: #000; color: white; margin-bottom: 10px; }
+        button { padding: 10px 20px; background: #d4af37; border: none; cursor: pointer; font-weight: bold; border-radius: 5px; width: 90%; margin: 5px; }
+        .reset-btn { background: #e74c3c; color: white; }
+    </style>
+</head>
+<body>
+    <h1>⚙️ Admin Dashboard</h1>
+
+    <div class="box">
+        <h3>Discord Integration</h3>
+        <input type="password" id="webhookURL" placeholder="Paste Webhook URL">
+        <button onclick="saveWebhook()">Save Webhook</button>
+    </div>
+
+    <div class="box">
+        <h3>Respawn Timer (Minutes)</h3>
+        <p style="font-size: 0.8rem; color: #888;">Default: 120 (2 Hours)</p>
+        <input type="number" id="respawnMins" placeholder="120">
+        <button onclick="saveTime()">Update Respawn Time</button>
+    </div>
+
+    <div class="box">
+        <h3>Danger Zone</h3>
+        <button class="reset-btn" onclick="resetAll()">RESET ALL TIMERS</button>
+    </div>
+
+    <p><a href="index.html" style="color: #d4af37;">← Back to Tracker</a></p>
+
+    <script>
+        // Load current values
+        document.getElementById('respawnMins').value = localStorage.getItem('respawn_setting') || 120;
+
+        function saveWebhook() {
+            localStorage.setItem('discord_url', document.getElementById('webhookURL').value);
+            alert("Webhook saved!");
+        }
+
+        function saveTime() {
+            const mins = document.getElementById('respawnMins').value;
+            localStorage.setItem('respawn_setting', mins);
+            alert("Respawn time set to " + mins + " minutes!");
+        }
+
+        function resetAll() {
+            if(confirm("Are you sure? This will wipe ALL active boss timers!")) {
+                // This clears everything in local storage
+                localStorage.clear();
+                alert("All timers cleared.");
+                window.location.reload();
+            }
+        }
+    </script>
+</body>
+</html>
