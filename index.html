@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ymir Boss Tracker Pro by : AnubisZ</title>
+    <title>Ymir Boss Tracker Pro</title>
     <style>
         :root {
             --gold: #d4af37;
@@ -34,7 +34,6 @@
             text-shadow: 0 2px 4px rgba(0,0,0,0.5);
         }
 
-        /* Tabs Styling */
         .tabs {
             display: flex;
             gap: 10px;
@@ -58,10 +57,8 @@
             border-color: var(--gold);
             color: var(--gold);
             background: rgba(212, 175, 55, 0.1);
-            box-shadow: 0 0 10px rgba(212, 175, 55, 0.2);
         }
 
-        /* Grid Layout */
         .floor-content {
             display: none;
             grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -74,19 +71,12 @@
             display: grid;
         }
 
-        /* Boss Card Styling */
         .boss-card {
             background: var(--card-bg);
             border: 1px solid var(--border);
             border-radius: 12px;
             padding: 20px;
             text-align: center;
-            transition: transform 0.2s, border-color 0.2s;
-        }
-
-        .boss-card:hover {
-            transform: translateY(-5px);
-            border-color: #555;
         }
 
         .boss-name {
@@ -100,11 +90,11 @@
             font-size: 2.2rem;
             font-family: 'Courier New', monospace;
             margin: 15px 0;
-            color: var(--green); /* Green when alive */
+            color: var(--green);
         }
 
         .timer.counting {
-            color: var(--gold); /* Gold when counting down */
+            color: var(--gold);
         }
 
         .killed-btn {
@@ -117,7 +107,7 @@
             width: 100%;
             font-weight: bold;
             text-transform: uppercase;
-            transition: all 0.3s;
+            transition: 0.3s;
         }
 
         .killed-btn:hover {
@@ -125,16 +115,19 @@
             color: white;
         }
 
-        footer {
-            margin-top: 50px;
-            color: #444;
-            font-size: 0.8rem;
+        .status-dot {
+            height: 10px;
+            width: 10px;
+            background-color: var(--green);
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 5px;
         }
     </style>
 </head>
 <body>
 
-    <h1>🔱 FOLKVANG TIMER BY : ANUBISZ 🔱</h1>
+    <h1>🔱 Legend of Ymir 🔱</h1>
 
     <div class="tabs">
         <button class="tab-btn active" onclick="showFloor('floor1')">Floor 1</button>
@@ -143,19 +136,15 @@
         <button class="tab-btn" onclick="showFloor('floor4')">Floor 4</button>
     </div>
 
-    <div id="floors-container" style="width: 100%;">
-        </div>
-
-    <footer>
-        &copy; 2024 Ymir Guild Tracker | Private Dashboard
-    </footer>
+    <div id="floors-container" style="width: 100%;"></div>
 
     <script>
+        // --- CONFIGURATION ---
+        const GOOGLE_SCRIPT_URL = "PASTE_YOUR_GOOGLE_WEB_APP_URL_HERE"; 
         const bosses = ["Volva", "Berserker", "Warlord", "Skald"];
         const floors = ["floor1", "floor2", "floor3", "floor4"];
-        let sentAlerts = new Set();
 
-        // 1. Generate the UI for all 4 floors
+        // Generate UI
         const container = document.getElementById('floors-container');
         floors.forEach((floor, fIdx) => {
             let floorDiv = document.createElement('div');
@@ -168,14 +157,13 @@
                     <div class="boss-card">
                         <div class="boss-name">${boss}</div>
                         <div class="timer" id="time-${bossId}">ALIVE</div>
-                        <button class="killed-btn" onclick="startTimer('${bossId}', '${boss}', '${floor}')">MARK KILLED</button>
+                        <button class="killed-btn" onclick="markKilled('${bossId}', '${boss}', '${floor}')">MARK KILLED</button>
                     </div>
                 `;
             });
             container.appendChild(floorDiv);
         });
 
-        // 2. Tab Logic
         function showFloor(floorId) {
             document.querySelectorAll('.floor-content').forEach(f => f.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -183,38 +171,30 @@
             event.currentTarget.classList.add('active');
         }
 
-        // 3. Timer Logic
-        function startTimer(id, bossName, floorName) {
-            // Check if admin has set a custom time, else default to 120 mins
+        async function markKilled(id, bossName, floorName) {
+            const now = new Date();
+            
+            // 1. Send to Google Sheets for 24/7 Discord Pings
+            if (GOOGLE_SCRIPT_URL !== "https://script.google.com/macros/s/AKfycbyKJzHQABfWGz9DnkRT_sPx7XkEOtWvhuSE8RxwdgVepcdPqPG7bVexl1wDtFAvqZ69/exec") {
+                fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    body: JSON.stringify({
+                        boss: bossName,
+                        floor: floorName,
+                        time: now.toISOString()
+                    })
+                });
+            }
+
+            // 2. Set Local Visual Timer
             const adminSetting = localStorage.getItem('respawn_setting');
             const mins = adminSetting ? parseInt(adminSetting) : 120;
+            const targetTime = now.getTime() + (mins * 60 * 1000);
             
-            const targetTime = new Date().getTime() + (mins * 60 * 1000);
             localStorage.setItem(id, targetTime);
-            sentAlerts.delete(id); // Allow a new alert for this boss
         }
 
-        // 4. Discord Alert Logic
-        async function sendDiscordPing(bossName, floor) {
-            const webhookUrl = localStorage.getItem('discord_url');
-            if (!webhookUrl) return; // Exit if no webhook saved in Admin
-
-            const payload = {
-                content: `🚨 **@everyone BOSS ALERT** 🚨\n**${bossName}** (${floor.toUpperCase()}) will spawn in **5 MINUTES**! ⚔️`
-            };
-
-            try {
-                await fetch(webhookUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-            } catch (err) {
-                console.error("Webhook failed to send:", err);
-            }
-        }
-
-        // 5. Update Loop (Runs every second)
         function updateDisplay() {
             floors.forEach(f => {
                 bosses.forEach(b => {
@@ -223,22 +203,13 @@
                     const savedTarget = localStorage.getItem(id);
                     
                     if (savedTarget) {
-                        const now = new Date().getTime();
-                        const diff = savedTarget - now;
-
+                        const diff = savedTarget - new Date().getTime();
                         if (diff > 0) {
                             const h = Math.floor(diff / 3600000);
                             const m = Math.floor((diff % 3600000) / 60000);
                             const s = Math.floor((diff % 60000) / 1000);
-                            
                             display.innerHTML = `${h}h ${m}m ${s}s`;
                             display.classList.add('counting');
-
-                            // Trigger Discord Ping at exactly 5 minutes left
-                            if (h === 0 && m === 5 && s === 0 && !sentAlerts.has(id)) {
-                                sendDiscordPing(b, f);
-                                sentAlerts.add(id);
-                            }
                         } else {
                             display.innerHTML = "ALIVE";
                             display.classList.remove('counting');
