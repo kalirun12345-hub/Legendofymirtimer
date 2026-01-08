@@ -5,9 +5,13 @@
     <style>
         body { background: #0f1215; color: white; font-family: sans-serif; text-align: center; padding: 30px; }
         .box { background: #1c2126; border: 1px solid #343b42; padding: 20px; border-radius: 10px; max-width: 400px; margin: 20px auto; }
-        input { padding: 10px; width: 80%; border-radius: 5px; border: 1px solid #d4af37; background: #000; color: white; margin-bottom: 10px; }
-        button { padding: 10px 20px; background: #d4af37; border: none; cursor: pointer; font-weight: bold; border-radius: 5px; width: 90%; margin: 5px; }
-        .reset-btn { background: #e74c3c; color: white; }
+        input { padding: 10px; width: 85%; border-radius: 5px; border: 1px solid #d4af37; background: #000; color: white; margin-bottom: 15px; }
+        button { padding: 12px; background: #d4af37; border: none; cursor: pointer; font-weight: bold; border-radius: 5px; width: 90%; margin: 5px; transition: 0.2s; }
+        button:hover { opacity: 0.8; transform: scale(1.02); }
+        .test-btn { background: #3498db; color: white; } /* Blue for testing */
+        .reset-btn { background: #e74c3c; color: white; margin-top: 20px; }
+        .status { margin-top: 10px; font-size: 0.9rem; font-weight: bold; }
+        a { color: #d4af37; text-decoration: none; display: inline-block; margin-top: 20px; }
     </style>
 </head>
 <body>
@@ -15,13 +19,14 @@
 
     <div class="box">
         <h3>Discord Integration</h3>
-        <input type="password" id="webhookURL" placeholder="Paste Webhook URL">
-        <button onclick="saveWebhook()">Save Webhook</button>
+        <input type="password" id="webhookURL" placeholder="Paste Discord Webhook URL">
+        <button onclick="saveWebhook()">1. Save Webhook</button>
+        <button class="test-btn" onclick="testWebhook()">2. Test Connection</button>
+        <div id="statusMsg" class="status"></div>
     </div>
 
     <div class="box">
         <h3>Respawn Timer (Minutes)</h3>
-        <p style="font-size: 0.8rem; color: #888;">Default: 120 (2 Hours)</p>
         <input type="number" id="respawnMins" placeholder="120">
         <button onclick="saveTime()">Update Respawn Time</button>
     </div>
@@ -31,15 +36,50 @@
         <button class="reset-btn" onclick="resetAll()">RESET ALL TIMERS</button>
     </div>
 
-    <p><a href="index.html" style="color: #d4af37;">← Back to Tracker</a></p>
+    <p><a href="index.html">← Back to Tracker</a></p>
 
     <script>
-        // Load current values
+        // Load current respawn value on page open
         document.getElementById('respawnMins').value = localStorage.getItem('respawn_setting') || 120;
 
         function saveWebhook() {
-            localStorage.setItem('discord_url', document.getElementById('webhookURL').value);
-            alert("Webhook saved!");
+            const url = document.getElementById('webhookURL').value;
+            if(!url.includes("discord.com/api/webhooks")) {
+                showStatus("Invalid Webhook URL!", "#e74c3c");
+                return;
+            }
+            localStorage.setItem('discord_url', url);
+            showStatus("Webhook Saved!", "#2ecc71");
+        }
+
+        async function testWebhook() {
+            const url = localStorage.getItem('discord_url');
+            const status = document.getElementById('statusMsg');
+            
+            if (!url) {
+                showStatus("Error: No URL saved!", "#e74c3c");
+                return;
+            }
+
+            showStatus("Sending test...", "#3498db");
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        content: "🔗 **Success!** Your Ymir Boss Tracker is now connected to this channel." 
+                    })
+                });
+
+                if (response.ok) {
+                    showStatus("Success! Check Discord.", "#2ecc71");
+                } else {
+                    showStatus("Error: Discord rejected the link.", "#e74c3c");
+                }
+            } catch (err) {
+                showStatus("Network Error: Check your connection.", "#e74c3c");
+            }
         }
 
         function saveTime() {
@@ -49,12 +89,22 @@
         }
 
         function resetAll() {
-            if(confirm("Are you sure? This will wipe ALL active boss timers!")) {
-                // This clears everything in local storage
+            if(confirm("Are you sure? This will wipe ALL active boss timers for you!")) {
+                // Clear boss timers but keep the webhook and settings
+                const webhook = localStorage.getItem('discord_url');
+                const respawn = localStorage.getItem('respawn_setting');
                 localStorage.clear();
+                localStorage.setItem('discord_url', webhook);
+                localStorage.setItem('respawn_setting', respawn);
                 alert("All timers cleared.");
                 window.location.reload();
             }
+        }
+
+        function showStatus(msg, color) {
+            const status = document.getElementById('statusMsg');
+            status.innerText = msg;
+            status.style.color = color;
         }
     </script>
 </body>
