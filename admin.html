@@ -3,13 +3,12 @@
 <head>
     <title>Admin - Boss Settings</title>
     <style>
-        body { background: #0f1215; color: white; font-family: sans-serif; text-align: center; padding: 30px; }
-        .box { background: #1c2126; border: 1px solid #343b42; padding: 20px; border-radius: 10px; max-width: 400px; margin: 20px auto; }
-        input { padding: 12px; width: 85%; border-radius: 5px; border: 1px solid #d4af37; background: #000; color: white; margin-bottom: 15px; }
-        button { padding: 12px; background: #d4af37; border: none; cursor: pointer; font-weight: bold; border-radius: 5px; width: 90%; margin: 5px; transition: 0.2s; }
-        button:hover { opacity: 0.8; }
-        .test-btn { background: #3498db; color: white; }
-        .status { margin-top: 15px; font-weight: bold; height: 20px; }
+        body { background: #0f1215; color: white; font-family: sans-serif; text-align: center; padding: 20px; }
+        .box { background: #1c2126; border: 1px solid #343b42; padding: 20px; border-radius: 10px; max-width: 500px; margin: 20px auto; }
+        select, input { padding: 10px; width: 90%; border-radius: 5px; border: 1px solid #d4af37; background: #000; color: white; margin-bottom: 10px; }
+        button { padding: 12px; background: #d4af37; border: none; cursor: pointer; font-weight: bold; border-radius: 5px; width: 95%; margin-top: 5px; }
+        .reset-btn { background: #e74c3c; color: white; margin-top: 15px; }
+        .status { margin-top: 10px; font-size: 0.9rem; font-weight: bold; }
         a { color: #d4af37; text-decoration: none; display: block; margin-top: 20px; }
     </style>
 </head>
@@ -17,16 +16,32 @@
     <h1>⚙️ Admin Dashboard</h1>
 
     <div class="box">
-        <h3>System Test</h3>
-        <p style="font-size: 0.8rem; color: #888;">This sends a test signal through Google to Discord.</p>
-        <button class="test-btn" onclick="testConnection()">SEND TEST PING</button>
-        <div id="statusMsg" class="status"></div>
+        <h3>🚨 Emergency Reset</h3>
+        <p style="font-size: 0.8rem; color: #888;">Use this if someone marked a boss by mistake.</p>
+        
+        <select id="resetFloor">
+            <option value="floor1">Floor 1</option>
+            <option value="floor2">Floor 2</option>
+            <option value="floor3">Floor 3</option>
+            <option value="floor4">Floor 4</option>
+        </select>
+
+        <select id="resetBoss">
+            <option value="Volva">Volva</option>
+            <option value="Berserker">Berserker</option>
+            <option value="Warlord">Warlord</option>
+            <option value="Skald">Skald</option>
+        </select>
+
+        <button class="reset-btn" onclick="resetBoss()">RESET TIMER & DELETE RECORD</button>
+        <div id="resetStatus" class="status"></div>
     </div>
 
     <div class="box">
-        <h3>Respawn Timer (Minutes)</h3>
-        <input type="number" id="respawnMins" placeholder="Default: 120">
+        <h3>System Settings</h3>
+        <input type="number" id="respawnMins" placeholder="Respawn Minutes (e.g. 120)">
         <button onclick="saveTime()">Update Timer Settings</button>
+        <button style="background: #3498db; margin-top:10px;" onclick="testPing()">Test Discord Connection</button>
     </div>
 
     <p><a href="index.html">← Back to Tracker</a></p>
@@ -34,32 +49,43 @@
     <script>
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzM2yeTWYle0Ufevgdw9Q98hkhE4Crcjo6iRTAdDh_rNCpYG9XqvMPbPFj7j9WekxqA/exec";
 
-        async function testConnection() {
-            const status = document.getElementById('statusMsg');
-            status.innerText = "Sending signal...";
-            status.style.color = "#3498db";
+        async function resetBoss() {
+            const boss = document.getElementById('resetBoss').value;
+            const floor = document.getElementById('resetFloor').value;
+            const status = document.getElementById('resetStatus');
+            const id = `${floor}-${boss}`;
 
+            status.innerText = "Processing Reset...";
+            status.style.color = "#d4af37";
+
+            // 1. Clear Local Memory Immediately
+            localStorage.removeItem(id);
+
+            // 2. Tell Google to delete the record
             try {
                 await fetch(GOOGLE_SCRIPT_URL, {
                     method: 'POST',
-                    mode: 'no-cors',
-                    body: JSON.stringify({ type: "TEST_WEBHOOK" })
+                    body: JSON.stringify({ type: "RESET_BOSS", boss: boss, floor: floor })
                 });
-                status.innerText = "Signal Sent! Check Discord.";
+                status.innerText = `SUCCESS: ${boss} (${floor}) is now ALIVE.`;
                 status.style.color = "#2ecc71";
             } catch (err) {
-                status.innerText = "Failed to reach Google.";
+                status.innerText = "Error: Could not reach Spreadsheet.";
                 status.style.color = "#e74c3c";
             }
+        }
+
+        async function testPing() {
+            fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ type: "TEST_WEBHOOK" }) });
+            alert("Test ping sent to Discord!");
         }
 
         function saveTime() {
             const mins = document.getElementById('respawnMins').value;
             localStorage.setItem('respawn_setting', mins);
-            alert("Respawn timer updated!");
+            alert("Global timer set to " + mins + " minutes.");
         }
 
-        // Set initial value
         document.getElementById('respawnMins').value = localStorage.getItem('respawn_setting') || 120;
     </script>
 </body>
