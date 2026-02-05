@@ -16,7 +16,7 @@
             border: 1px solid #343b42;
             padding: 20px;
             border-radius: 10px;
-            max-width: 500px;
+            max-width: 520px;
             margin: 20px auto;
         }
 
@@ -59,6 +59,33 @@
             display: block;
             margin-top: 20px;
         }
+
+        /* ✅ EMBED PREVIEW STYLE */
+        .embed-preview {
+            margin-top: 15px;
+            padding: 15px;
+            border-left: 5px solid #d4af37;
+            background: rgba(255,255,255,0.05);
+            text-align: left;
+            border-radius: 8px;
+        }
+
+        .embed-title {
+            font-weight: bold;
+            font-size: 1.05rem;
+            margin-bottom: 6px;
+            color: #f1c40f;
+        }
+
+        .embed-desc {
+            font-size: 0.95rem;
+            margin-bottom: 10px;
+        }
+
+        .embed-field {
+            font-size: 0.85rem;
+            color: #ccc;
+        }
     </style>
 </head>
 <body>
@@ -68,11 +95,7 @@
 <!-- RESET BOX -->
 <div class="box">
     <h3>🚨 Emergency Reset</h3>
-    <p style="font-size: 0.8rem; color: #888;">
-        Use this if someone marked a boss by mistake.
-    </p>
 
-    <!-- FLOOR SELECT -->
     <select id="resetFloor" onchange="updateBossList()">
         <option value="floor1">Floor 1</option>
         <option value="floor2">Floor 2</option>
@@ -81,7 +104,6 @@
         <option value="mykriel">Mykriel</option>
     </select>
 
-    <!-- BOSS SELECT -->
     <select id="resetBoss"></select>
 
     <button class="reset-btn" onclick="resetBoss()">
@@ -98,8 +120,22 @@
     <input type="number" id="respawnMins" placeholder="Respawn Minutes (e.g. 120)">
     <button onclick="saveTime()">Update Timer Settings</button>
 
-    <button style="background: #3498db; margin-top:10px;" onclick="testPing()">
-        Test Discord Connection
+    <!-- ✅ DISCORD EMBED PREVIEW -->
+    <h3 style="margin-top:20px;">Discord Test Embed Preview</h3>
+
+    <div class="embed-preview">
+        <div class="embed-title">⚠️ Boss Respawning Soon!</div>
+        <div class="embed-desc">
+            <b>TEST BOSS</b> will respawn in <b>2 minutes</b>!
+        </div>
+        <div class="embed-field">📍 Location: <b>ADMIN PANEL</b></div>
+        <div class="embed-field" style="margin-top:8px; color:#888;">
+            Footer: Legend of Ymir Boss Tracker
+        </div>
+    </div>
+
+    <button style="background:#3498db; margin-top:15px;" onclick="testPing()">
+        Send Test Embed to Discord
     </button>
 
     <div id="pingStatus" class="status"></div>
@@ -108,14 +144,11 @@
 <p><a href="index.html">← Back to Tracker</a></p>
 
 <script>
-    // ✅ Your Google Script URL
     const GOOGLE_SCRIPT_URL =
         "https://script.google.com/macros/s/AKfycbw4ie1gR4hr5yDlwBimiOPBNWTFFB08sv1aAnodEATR4O0Hk6jwg16otOr1l_7TCpol/exec";
 
-    // Floor Bosses
     const floorBosses = ["Volva", "Berserker", "Warlord", "Skald"];
 
-    // Mykriel Bosses (8 total)
     const mykrielBosses = [
         "66 CH1", "66 CH2",
         "67 CH1", "67 CH2",
@@ -123,7 +156,6 @@
         "69 CH1", "69 CH2"
     ];
 
-    // ✅ Populate Boss List Dynamically
     function updateBossList() {
         const floor = document.getElementById("resetFloor").value;
         const bossSelect = document.getElementById("resetBoss");
@@ -140,7 +172,6 @@
         });
     }
 
-    // ✅ Reset Boss Function (FIXED HEADERS)
     async function resetBoss() {
         const boss = document.getElementById("resetBoss").value;
         const floor = document.getElementById("resetFloor").value;
@@ -151,15 +182,12 @@
         status.innerText = "Processing Reset...";
         status.style.color = "#d4af37";
 
-        // Clear local timer
         localStorage.removeItem(id);
 
         try {
             await fetch(GOOGLE_SCRIPT_URL, {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     type: "RESET_BOSS",
                     boss: boss,
@@ -170,49 +198,43 @@
             status.innerText = `✅ SUCCESS: ${boss} (${floor}) is now ALIVE.`;
             status.style.color = "#2ecc71";
 
-        } catch (err) {
-            status.innerText = "❌ Error: Could not reach Spreadsheet.";
+        } catch {
+            status.innerText = "❌ Error: Could not reset boss.";
             status.style.color = "#e74c3c";
         }
     }
 
-    // ✅ Test Discord Ping (FIXED HEADERS)
     async function testPing() {
         const pingStatus = document.getElementById("pingStatus");
 
-        pingStatus.innerText = "Sending Test Ping...";
+        pingStatus.innerText = "Sending Test Embed...";
         pingStatus.style.color = "#d4af37";
 
         try {
             await fetch(GOOGLE_SCRIPT_URL, {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ type: "TEST_WEBHOOK" })
             });
 
-            pingStatus.innerText = "✅ Discord Ping Sent Successfully!";
+            pingStatus.innerText = "✅ Test Embed Sent Successfully!";
             pingStatus.style.color = "#2ecc71";
 
-        } catch (err) {
-            pingStatus.innerText = "❌ Discord Ping Failed!";
+        } catch {
+            pingStatus.innerText = "❌ Failed to send embed.";
             pingStatus.style.color = "#e74c3c";
         }
     }
 
-    // Save Global Respawn Setting (Floors Only)
     function saveTime() {
         const mins = document.getElementById("respawnMins").value;
         localStorage.setItem("respawn_setting", mins);
         alert("Global timer set to " + mins + " minutes.");
     }
 
-    // Load Saved Setting
     document.getElementById("respawnMins").value =
         localStorage.getItem("respawn_setting") || 120;
 
-    // Run once on load
     updateBossList();
 </script>
 
