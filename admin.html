@@ -3,90 +3,197 @@
 <head>
     <title>Admin - Boss Settings</title>
     <style>
-        body { background: #0f1215; color: white; font-family: sans-serif; text-align: center; padding: 20px; }
-        .box { background: #1c2126; border: 1px solid #343b42; padding: 20px; border-radius: 10px; max-width: 500px; margin: 20px auto; }
-        select, input { padding: 10px; width: 90%; border-radius: 5px; border: 1px solid #d4af37; background: #000; color: white; margin-bottom: 10px; }
-        button { padding: 12px; background: #d4af37; border: none; cursor: pointer; font-weight: bold; border-radius: 5px; width: 95%; margin-top: 5px; }
-        .reset-btn { background: #e74c3c; color: white; margin-top: 15px; }
-        .status { margin-top: 10px; font-size: 0.9rem; font-weight: bold; }
-        a { color: #d4af37; text-decoration: none; display: block; margin-top: 20px; }
+        body {
+            background: #0f1215;
+            color: white;
+            font-family: sans-serif;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .box {
+            background: #1c2126;
+            border: 1px solid #343b42;
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 500px;
+            margin: 20px auto;
+        }
+
+        select, input {
+            padding: 10px;
+            width: 90%;
+            border-radius: 5px;
+            border: 1px solid #d4af37;
+            background: #000;
+            color: white;
+            margin-bottom: 10px;
+        }
+
+        button {
+            padding: 12px;
+            background: #d4af37;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            border-radius: 5px;
+            width: 95%;
+            margin-top: 5px;
+        }
+
+        .reset-btn {
+            background: #e74c3c;
+            color: white;
+            margin-top: 15px;
+        }
+
+        .status {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        a {
+            color: #d4af37;
+            text-decoration: none;
+            display: block;
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
-    <h1>⚙️ Admin Dashboard</h1>
 
-    <div class="box">
-        <h3>🚨 Emergency Reset</h3>
-        <p style="font-size: 0.8rem; color: #888;">Use this if someone marked a boss by mistake.</p>
-        
-        <select id="resetFloor">
-            <option value="floor1">Floor 1</option>
-            <option value="floor2">Floor 2</option>
-            <option value="floor3">Floor 3</option>
-            <option value="floor4">Floor 4</option>
-        </select>
+<h1>⚙️ Admin Dashboard</h1>
 
-        <select id="resetBoss">
-            <option value="Volva">Volva</option>
-            <option value="Berserker">Berserker</option>
-            <option value="Warlord">Warlord</option>
-            <option value="Skald">Skald</option>
-        </select>
+<div class="box">
+    <h3>🚨 Emergency Reset</h3>
+    <p style="font-size: 0.8rem; color: #888;">
+        Use this if someone marked a boss by mistake.
+    </p>
 
-        <button class="reset-btn" onclick="resetBoss()">RESET TIMER & DELETE RECORD</button>
-        <div id="resetStatus" class="status"></div>
-    </div>
+    <!-- FLOOR SELECT -->
+    <select id="resetFloor" onchange="updateBossList()">
+        <option value="floor1">Floor 1</option>
+        <option value="floor2">Floor 2</option>
+        <option value="floor3">Floor 3</option>
+        <option value="floor4">Floor 4</option>
+        <option value="mykriel">Mykriel</option>
+    </select>
 
-    <div class="box">
-        <h3>System Settings</h3>
-        <input type="number" id="respawnMins" placeholder="Respawn Minutes (e.g. 120)">
-        <button onclick="saveTime()">Update Timer Settings</button>
-        <button style="background: #3498db; margin-top:10px;" onclick="testPing()">Test Discord Connection</button>
-    </div>
+    <!-- BOSS SELECT -->
+    <select id="resetBoss"></select>
 
-    <p><a href="index.html">← Back to Tracker</a></p>
+    <button class="reset-btn" onclick="resetBoss()">
+        RESET TIMER & DELETE RECORD
+    </button>
 
-    <script>
-        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzM2yeTWYle0Ufevgdw9Q98hkhE4Crcjo6iRTAdDh_rNCpYG9XqvMPbPFj7j9WekxqA/exec";
+    <div id="resetStatus" class="status"></div>
+</div>
 
-        async function resetBoss() {
-            const boss = document.getElementById('resetBoss').value;
-            const floor = document.getElementById('resetFloor').value;
-            const status = document.getElementById('resetStatus');
-            const id = `${floor}-${boss}`;
+<div class="box">
+    <h3>System Settings</h3>
 
-            status.innerText = "Processing Reset...";
-            status.style.color = "#d4af37";
+    <input type="number" id="respawnMins" placeholder="Respawn Minutes (e.g. 120)">
+    <button onclick="saveTime()">Update Timer Settings</button>
 
-            // 1. Clear Local Memory Immediately
-            localStorage.removeItem(id);
+    <button style="background: #3498db; margin-top:10px;" onclick="testPing()">
+        Test Discord Connection
+    </button>
+</div>
 
-            // 2. Tell Google to delete the record
-            try {
-                await fetch(GOOGLE_SCRIPT_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({ type: "RESET_BOSS", boss: boss, floor: floor })
-                });
-                status.innerText = `SUCCESS: ${boss} (${floor}) is now ALIVE.`;
-                status.style.color = "#2ecc71";
-            } catch (err) {
-                status.innerText = "Error: Could not reach Spreadsheet.";
-                status.style.color = "#e74c3c";
-            }
+<p><a href="index.html">← Back to Tracker</a></p>
+
+<script>
+    const GOOGLE_SCRIPT_URL =
+        "https://script.google.com/macros/s/AKfycbzM2yeTWYle0Ufevgdw9Q98hkhE4Crcjo6iRTAdDh_rNCpYG9XqvMPbPFj7j9WekxqA/exec";
+
+    // Floor Bosses
+    const floorBosses = ["Volva", "Berserker", "Warlord", "Skald"];
+
+    // Mykriel Bosses (8 total)
+    const mykrielBosses = [
+        "66 CH1", "66 CH2",
+        "67 CH1", "67 CH2",
+        "68 CH1", "68 CH2",
+        "69 CH1", "69 CH2"
+    ];
+
+    // Populate Boss List Dynamically
+    function updateBossList() {
+        const floor = document.getElementById("resetFloor").value;
+        const bossSelect = document.getElementById("resetBoss");
+
+        bossSelect.innerHTML = "";
+
+        let bossList = floor === "mykriel" ? mykrielBosses : floorBosses;
+
+        bossList.forEach(boss => {
+            let option = document.createElement("option");
+            option.value = boss;
+            option.textContent = boss;
+            bossSelect.appendChild(option);
+        });
+    }
+
+    // Reset Boss Function
+    async function resetBoss() {
+        const boss = document.getElementById("resetBoss").value;
+        const floor = document.getElementById("resetFloor").value;
+        const status = document.getElementById("resetStatus");
+
+        // Correct localStorage ID format
+        const id = `${floor}-${boss}`;
+
+        status.innerText = "Processing Reset...";
+        status.style.color = "#d4af37";
+
+        // 1. Clear Local Timer
+        localStorage.removeItem(id);
+
+        // 2. Tell Google Sheet to delete record
+        try {
+            await fetch(GOOGLE_SCRIPT_URL, {
+                method: "POST",
+                body: JSON.stringify({
+                    type: "RESET_BOSS",
+                    boss: boss,
+                    floor: floor
+                })
+            });
+
+            status.innerText = `SUCCESS: ${boss} (${floor}) is now ALIVE.`;
+            status.style.color = "#2ecc71";
+
+        } catch (err) {
+            status.innerText = "Error: Could not reach Spreadsheet.";
+            status.style.color = "#e74c3c";
         }
+    }
 
-        async function testPing() {
-            fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ type: "TEST_WEBHOOK" }) });
-            alert("Test ping sent to Discord!");
-        }
+    // Test Discord Ping
+    async function testPing() {
+        fetch(GOOGLE_SCRIPT_URL, {
+            method: "POST",
+            body: JSON.stringify({ type: "TEST_WEBHOOK" })
+        });
 
-        function saveTime() {
-            const mins = document.getElementById('respawnMins').value;
-            localStorage.setItem('respawn_setting', mins);
-            alert("Global timer set to " + mins + " minutes.");
-        }
+        alert("Test ping sent to Discord!");
+    }
 
-        document.getElementById('respawnMins').value = localStorage.getItem('respawn_setting') || 120;
-    </script>
+    // Save Global Respawn Setting (Floors Only)
+    function saveTime() {
+        const mins = document.getElementById("respawnMins").value;
+        localStorage.setItem("respawn_setting", mins);
+        alert("Global timer set to " + mins + " minutes.");
+    }
+
+    // Load Saved Setting
+    document.getElementById("respawnMins").value =
+        localStorage.getItem("respawn_setting") || 120;
+
+    // Run Once On Load
+    updateBossList();
+</script>
+
 </body>
 </html>
