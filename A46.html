@@ -122,7 +122,7 @@
 
 <body>
 
-<h1>🔱 A46 ANUBISZ TIMER 🔱</h1>
+<h1>🔱 Legend of Ymir Boss Tracker 🔱</h1>
 <div class="sync-indicator">Discord + Respawn Alerts Enabled</div>
 
 <!-- DASHBOARD -->
@@ -170,11 +170,11 @@
   const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzM2yeTWYle0Ufevgdw9Q98hkhE4Crcjo6iRTAdDh_rNCpYG9XqvMPbPFj7j9WekxqA/exec";
   const DISCORD_WEBHOOK_URL = "YOUR_DISCORD_WEBHOOK_HERE";
 
-  // Floors
+  // Floors (2 hours respawn)
   const bosses = ["Volva", "Berserker", "Warlord", "Skald"];
   const floors = ["floor1", "floor2", "floor3", "floor4"];
 
-  // Mykriel Bosses (8 Total)
+  // Mykriel Bosses (8 Total, ALWAYS 1 hour respawn)
   const mykrielBosses = [
     "66 CH1", "66 CH2",
     "67 CH1", "67 CH2",
@@ -192,7 +192,7 @@
     const payload = {
       content: "@everyone",
       embeds: [{
-        title: "🔥 Boss Killed! ALERTO KAYO BY: ANUBISZ",
+        title: "🔥 Boss Killed!",
         description: `**${bossName}** has been defeated!`,
         fields: [
           { name: "📍 Location", value: floorName.toUpperCase(), inline: true },
@@ -214,6 +214,7 @@
   // UI GENERATION
   // ==============================
 
+  // Floors 1–4
   floors.forEach((floor, idx) => {
     let div = document.createElement("div");
     div.id = floor;
@@ -275,10 +276,16 @@
   }
 
   // ==============================
-  // MARK KILLED
+  // MARK KILLED (MYKRIEL HARD LOCK = 60 MIN)
   // ==============================
 
   function markKilled(id, bossName, floorName, respawnMinutes) {
+
+    // ✅ HARD LOCK: Mykriel always 1 hour only
+    if (floorName === "mykriel") {
+      respawnMinutes = 60;
+    }
+
     const now = new Date();
     const targetTime = now.getTime() + respawnMinutes * 60000;
 
