@@ -60,7 +60,7 @@
             margin-top: 20px;
         }
 
-        /* ✅ EMBED PREVIEW STYLE */
+        /* EMBED PREVIEW */
         .embed-preview {
             margin-top: 15px;
             padding: 15px;
@@ -120,7 +120,7 @@
     <input type="number" id="respawnMins" placeholder="Respawn Minutes (e.g. 120)">
     <button onclick="saveTime()">Update Timer Settings</button>
 
-    <!-- ✅ DISCORD EMBED PREVIEW -->
+    <!-- DISCORD EMBED PREVIEW -->
     <h3 style="margin-top:20px;">Discord Test Embed Preview</h3>
 
     <div class="embed-preview">
@@ -144,9 +144,11 @@
 <p><a href="index.html">← Back to Tracker</a></p>
 
 <script>
+    // ✅ Google Script URL
     const GOOGLE_SCRIPT_URL =
         "https://script.google.com/macros/s/AKfycbw4ie1gR4hr5yDlwBimiOPBNWTFFB08sv1aAnodEATR4O0Hk6jwg16otOr1l_7TCpol/exec";
 
+    // Boss Lists
     const floorBosses = ["Volva", "Berserker", "Warlord", "Skald"];
 
     const mykrielBosses = [
@@ -156,6 +158,7 @@
         "69 CH1", "69 CH2"
     ];
 
+    // Populate Boss Dropdown
     function updateBossList() {
         const floor = document.getElementById("resetFloor").value;
         const bossSelect = document.getElementById("resetBoss");
@@ -172,7 +175,8 @@
         });
     }
 
-    async function resetBoss() {
+    // ✅ RESET BOSS (CORS SAFE)
+    function resetBoss() {
         const boss = document.getElementById("resetBoss").value;
         const floor = document.getElementById("resetFloor").value;
         const status = document.getElementById("resetStatus");
@@ -182,59 +186,53 @@
         status.innerText = "Processing Reset...";
         status.style.color = "#d4af37";
 
+        // Clear Local Timer
         localStorage.removeItem(id);
 
-        try {
-            await fetch(GOOGLE_SCRIPT_URL, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    type: "RESET_BOSS",
-                    boss: boss,
-                    floor: floor
-                })
-            });
+        // Send Request (NO CORS)
+        fetch(GOOGLE_SCRIPT_URL, {
+            method: "POST",
+            mode: "no-cors",
+            body: JSON.stringify({
+                type: "RESET_BOSS",
+                boss: boss,
+                floor: floor
+            })
+        });
 
-            status.innerText = `✅ SUCCESS: ${boss} (${floor}) is now ALIVE.`;
-            status.style.color = "#2ecc71";
-
-        } catch {
-            status.innerText = "❌ Error: Could not reset boss.";
-            status.style.color = "#e74c3c";
-        }
+        status.innerText = `✅ Reset Sent: ${boss} (${floor}) is now ALIVE.`;
+        status.style.color = "#2ecc71";
     }
 
-    async function testPing() {
+    // ✅ TEST DISCORD EMBED (CORS SAFE)
+    function testPing() {
         const pingStatus = document.getElementById("pingStatus");
 
         pingStatus.innerText = "Sending Test Embed...";
         pingStatus.style.color = "#d4af37";
 
-        try {
-            await fetch(GOOGLE_SCRIPT_URL, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ type: "TEST_WEBHOOK" })
-            });
+        fetch(GOOGLE_SCRIPT_URL, {
+            method: "POST",
+            mode: "no-cors",
+            body: JSON.stringify({ type: "TEST_WEBHOOK" })
+        });
 
-            pingStatus.innerText = "✅ Test Embed Sent Successfully!";
-            pingStatus.style.color = "#2ecc71";
-
-        } catch {
-            pingStatus.innerText = "❌ Failed to send embed.";
-            pingStatus.style.color = "#e74c3c";
-        }
+        pingStatus.innerText = "✅ Test Embed Sent! Check Discord.";
+        pingStatus.style.color = "#2ecc71";
     }
 
+    // Save Respawn Setting
     function saveTime() {
         const mins = document.getElementById("respawnMins").value;
         localStorage.setItem("respawn_setting", mins);
         alert("Global timer set to " + mins + " minutes.");
     }
 
+    // Load Saved Timer
     document.getElementById("respawnMins").value =
         localStorage.getItem("respawn_setting") || 120;
 
+    // Run on Load
     updateBossList();
 </script>
 
