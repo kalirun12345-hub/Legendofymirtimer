@@ -1,172 +1,429 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ymir Boss Tracker Pro</title>
-    <style>
-        :root { --gold: #d4af37; --dark-bg: #0f1215; --card-bg: #1c2126; --border: #343b42; --red: #e74c3c; --green: #2ecc71; --text-gray: #888; }
-        body { background-color: var(--dark-bg); color: white; font-family: sans-serif; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
-        h1 { color: var(--gold); text-transform: uppercase; letter-spacing: 3px; margin-bottom: 20px; }
-        
-        .sync-indicator { font-size: 0.7rem; color: var(--text-gray); margin-bottom: 15px; text-transform: uppercase; }
-        .sync-indicator.syncing { color: var(--gold); }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ymir Boss Tracker Pro</title>
 
-        .tabs { display: flex; gap: 10px; margin-bottom: 30px; flex-wrap: wrap; justify-content: center; }
-        .tab-btn { background: var(--card-bg); border: 1px solid var(--border); color: var(--text-gray); padding: 12px 24px; cursor: pointer; border-radius: 6px; font-weight: bold; }
-        .tab-btn.active { border-color: var(--gold); color: var(--gold); background: rgba(212, 175, 55, 0.1); }
-        
-        .floor-content { display: none; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; width: 100%; max-width: 1200px; }
-        .floor-content.active { display: grid; }
-        
-        .boss-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 20px; text-align: center; }
-        .boss-name { font-size: 1.4rem; font-weight: bold; margin-bottom: 5px; }
-        .timer { font-size: 2.2rem; font-family: monospace; margin: 15px 0; color: var(--green); }
-        .timer.counting { color: var(--gold); font-weight: bold; }
-        
-        .killed-btn { background: transparent; border: 1px solid var(--red); color: var(--red); padding: 10px 20px; border-radius: 6px; cursor: pointer; width: 100%; font-weight: bold; }
-        .killed-btn:hover { background: var(--red); color: white; }
-    </style>
+  <style>
+    :root {
+      --gold: #d4af37;
+      --dark-bg: #0f1215;
+      --card-bg: #1c2126;
+      --border: #343b42;
+      --red: #e74c3c;
+      --green: #2ecc71;
+      --text-gray: #888;
+    }
+
+    body {
+      background-color: var(--dark-bg);
+      color: white;
+      font-family: sans-serif;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    h1 {
+      color: var(--gold);
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      margin-bottom: 10px;
+    }
+
+    .sync-indicator {
+      font-size: 0.7rem;
+      color: var(--text-gray);
+      margin-bottom: 15px;
+      text-transform: uppercase;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .tab-btn {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      color: var(--text-gray);
+      padding: 12px 24px;
+      cursor: pointer;
+      border-radius: 6px;
+      font-weight: bold;
+    }
+
+    .tab-btn.active {
+      border-color: var(--gold);
+      color: var(--gold);
+      background: rgba(212, 175, 55, 0.1);
+    }
+
+    .floor-content {
+      display: none;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 20px;
+      width: 100%;
+      max-width: 1200px;
+    }
+
+    .floor-content.active {
+      display: grid;
+    }
+
+    .boss-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .boss-name {
+      font-size: 1.4rem;
+      font-weight: bold;
+    }
+
+    .timer {
+      font-size: 2.2rem;
+      font-family: monospace;
+      margin: 15px 0;
+      color: var(--green);
+    }
+
+    .timer.counting {
+      color: var(--gold);
+      font-weight: bold;
+    }
+
+    .killed-btn {
+      background: transparent;
+      border: 1px solid var(--red);
+      color: var(--red);
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      width: 100%;
+      font-weight: bold;
+    }
+
+    .killed-btn:hover {
+      background: var(--red);
+      color: white;
+    }
+  </style>
 </head>
+
 <body>
 
-    <h1>🔱 Legend of Ymir 🔱</h1>
-    <div id="sync-status" class="sync-indicator">Live Sync Enabled</div>
+<h1>🔱 A46 ANUBISZ TIMER 🔱</h1>
+<div class="sync-indicator">Discord + Respawn Alerts Enabled</div>
 
-    <div class="tabs">
-        <button class="tab-btn active" onclick="showFloor('floor1')">Floor 1</button>
-        <button class="tab-btn" onclick="showFloor('floor2')">Floor 2</button>
-        <button class="tab-btn" onclick="showFloor('floor3')">Floor 3</button>
-        <button class="tab-btn" onclick="showFloor('floor4')">Floor 4</button>
-    </div>
+<!-- DASHBOARD -->
+<div id="next-dashboard" style="
+    width: 100%;
+    max-width: 900px;
+    margin-bottom: 25px;
+    padding: 15px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: rgba(212,175,55,0.05);
+">
+  <h2 style="color: var(--gold); margin: 0 0 10px;">
+    ⏳ Next Boss Spawn Order
+  </h2>
 
-    <div id="floors-container" style="width: 100%;"></div>
+  <div id="next-list" style="
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-family: monospace;
+      font-size: 1rem;
+      color: white;
+  ">
+    Loading...
+  </div>
+</div>
 
-    <script>
-        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzM2yeTWYle0Ufevgdw9Q98hkhE4Crcjo6iRTAdDh_rNCpYG9XqvMPbPFj7j9WekxqA/exec"; 
-        const bosses = ["Volva", "Berserker", "Warlord", "Skald"];
-        const floors = ["floor1", "floor2", "floor3", "floor4"];
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab-btn active" onclick="showFloor('floor1')">Floor 1</button>
+  <button class="tab-btn" onclick="showFloor('floor2')">Floor 2</button>
+  <button class="tab-btn" onclick="showFloor('floor3')">Floor 3</button>
+  <button class="tab-btn" onclick="showFloor('floor4')">Floor 4</button>
+  <button class="tab-btn" onclick="showFloor('mykriel')">Mykriel</button>
+</div>
 
-        // UI Generation
-        const container = document.getElementById('floors-container');
-        floors.forEach((floor, fIdx) => {
-            let floorDiv = document.createElement('div');
-            floorDiv.id = floor;
-            floorDiv.className = `floor-content ${fIdx === 0 ? 'active' : ''}`;
-            bosses.forEach(boss => {
-                const bossId = `${floor}-${boss}`;
-                floorDiv.innerHTML += `
-                    <div class="boss-card">
-                        <div class="boss-name">${boss}</div>
-                        <div class="timer" id="time-${bossId}">ALIVE</div>
-                        <button class="killed-btn" onclick="markKilled('${bossId}', '${boss}', '${floor}')">MARK KILLED</button>
-                    </div>`;
-            });
-            container.appendChild(floorDiv);
-        });
+<div id="floors-container" style="width:100%;"></div>
 
-        function showFloor(floorId) {
-            document.querySelectorAll('.floor-content').forEach(f => f.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById(floorId).classList.add('active');
-            if(window.event) window.event.currentTarget.classList.add('active');
-        }
+<script>
+  // ==============================
+  // CONFIG
+  // ==============================
 
-        // AUTO-SYNC LOGIC
-        async function fetchTimersFromGoogle() {
-            const statusEl = document.getElementById('sync-status');
-            statusEl.innerText = "Syncing with Spreadsheet...";
-            statusEl.classList.add('syncing');
+  const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzM2yeTWYle0Ufevgdw9Q98hkhE4Crcjo6iRTAdDh_rNCpYG9XqvMPbPFj7j9WekxqA/exec";
+  const DISCORD_WEBHOOK_URL = "YOUR_DISCORD_WEBHOOK_HERE";
 
-            try {
-                const response = await fetch(GOOGLE_SCRIPT_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({ type: "GET_TIMERS" })
-                });
-                const allRows = await response.json();
-                
-                // Process only the last 50 entries to stay fast
-                const relevantData = allRows.slice(1).slice(-50); 
-                const now = new Date().getTime();
-                const respawnMins = parseInt(localStorage.getItem('respawn_setting')) || 120;
+  // Floors
+  const bosses = ["Volva", "Berserker", "Warlord", "Skald"];
+  const floors = ["floor1", "floor2", "floor3", "floor4"];
 
-                relevantData.forEach(row => {
-                    const bName = row[0];
-                    const fName = row[1];
-                    const kTimeIso = row[2];
-                    const id = `${fName}-${bName}`;
+  // Mykriel Bosses (8 Total)
+  const mykrielBosses = [
+    "66 CH1", "66 CH2",
+    "67 CH1", "67 CH2",
+    "68 CH1", "68 CH2",
+    "69 CH1", "69 CH2"
+  ];
 
-                    const killTime = new Date(kTimeIso).getTime();
-                    const targetTime = killTime + (respawnMins * 60 * 1000);
+  const container = document.getElementById("floors-container");
 
-                    // If the boss is still dead, update local storage
-                    if (targetTime > now) {
-                        localStorage.setItem(id, targetTime.toString());
-                    }
-                });
+  // ==============================
+  // DISCORD EMBED NOTIFICATION
+  // ==============================
 
-                updateDisplay();
-                statusEl.innerText = "Live Sync Enabled (Updated Just Now)";
-            } catch (err) {
-                console.error("Sync Error:", err);
-                statusEl.innerText = "Sync Offline (Retrying...)";
-            }
-            statusEl.classList.remove('syncing');
-        }
+  function sendDiscordKillEmbed(bossName, floorName, respawnMinutes) {
+    const payload = {
+      content: "@everyone",
+      embeds: [{
+        title: "🔥 Boss Killed! ALERTO KAYO BY: ANUBISZ",
+        description: `**${bossName}** has been defeated!`,
+        fields: [
+          { name: "📍 Location", value: floorName.toUpperCase(), inline: true },
+          { name: "⏳ Respawn", value: `${respawnMinutes} minutes`, inline: true }
+        ],
+        footer: { text: "Legend of Ymir Boss Tracker" },
+        timestamp: new Date().toISOString()
+      }]
+    };
 
-        function markKilled(id, bossName, floorName) {
-            const now = new Date();
-            const mins = parseInt(localStorage.getItem('respawn_setting')) || 120;
-            const targetTime = now.getTime() + (mins * 60 * 1000);
-            
-            localStorage.setItem(id, targetTime.toString());
-            updateDisplay();
+    fetch(DISCORD_WEBHOOK_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+  }
 
-            fetch(GOOGLE_SCRIPT_URL, {
-                method: 'POST',
-                mode: 'no-cors',
-                body: JSON.stringify({ boss: bossName, floor: floorName, time: now.toISOString() })
-            });
-        }
+  // ==============================
+  // UI GENERATION
+  // ==============================
 
-        function updateDisplay() {
-            const currentTime = new Date().getTime();
-            floors.forEach(f => {
-                bosses.forEach(b => {
-                    const id = `${f}-${b}`;
-                    const display = document.getElementById(`time-${id}`);
-                    const savedValue = localStorage.getItem(id);
-                    
-                    if (savedValue) {
-                        const target = parseInt(savedValue);
-                        const diff = target - currentTime;
+  floors.forEach((floor, idx) => {
+    let div = document.createElement("div");
+    div.id = floor;
+    div.className = `floor-content ${idx === 0 ? "active" : ""}`;
 
-                        if (diff > 0) {
-                            const h = Math.floor(diff / 3600000);
-                            const m = Math.floor((diff % 3600000) / 60000);
-                            const s = Math.floor((diff % 60000) / 1000);
-                            display.innerHTML = h + "h " + m.toString().padStart(2, '0') + "m " + s.toString().padStart(2, '0') + "s";
-                            display.classList.add('counting');
-                        } else {
-                            display.innerHTML = "ALIVE";
-                            display.classList.remove('counting');
-                        }
-                    }
-                });
-            });
-        }
+    bosses.forEach(boss => {
+      const bossId = `${floor}-${boss}`;
+      div.innerHTML += `
+        <div class="boss-card">
+          <div class="boss-name">${boss}</div>
+          <div class="timer" id="time-${bossId}">ALIVE</div>
+          <button class="killed-btn"
+            onclick="markKilled('${bossId}','${boss}','${floor}',120)">
+            MARK KILLED
+          </button>
+        </div>
+      `;
+    });
 
-        // Run UI update every second
-        setInterval(updateDisplay, 1000);
+    container.appendChild(div);
+  });
 
-        // Run AUTO-SYNC every 30 seconds
-        setInterval(fetchTimersFromGoogle, 30000);
+  // Mykriel Section
+  let myDiv = document.createElement("div");
+  myDiv.id = "mykriel";
+  myDiv.className = "floor-content";
 
-        // Run once on initial load
-        window.onload = () => {
-            updateDisplay();
-            fetchTimersFromGoogle();
-        };
-    </script>
+  mykrielBosses.forEach(boss => {
+    const bossId = `mykriel-${boss}`;
+    myDiv.innerHTML += `
+      <div class="boss-card">
+        <div class="boss-name">Mykriel ${boss}</div>
+        <div class="timer" id="time-${bossId}">ALIVE</div>
+        <button class="killed-btn"
+          onclick="markKilled('${bossId}','${boss}','mykriel',60)">
+          MARK KILLED
+        </button>
+      </div>
+    `;
+  });
+
+  container.appendChild(myDiv);
+
+  // ==============================
+  // TAB SWITCHING
+  // ==============================
+
+  function showFloor(id) {
+    document.querySelectorAll(".floor-content").forEach(f =>
+      f.classList.remove("active")
+    );
+
+    document.querySelectorAll(".tab-btn").forEach(b =>
+      b.classList.remove("active")
+    );
+
+    document.getElementById(id).classList.add("active");
+    if (window.event) window.event.currentTarget.classList.add("active");
+  }
+
+  // ==============================
+  // MARK KILLED
+  // ==============================
+
+  function markKilled(id, bossName, floorName, respawnMinutes) {
+    const now = new Date();
+    const targetTime = now.getTime() + respawnMinutes * 60000;
+
+    localStorage.setItem(id, targetTime.toString());
+    updateDisplay();
+
+    // Save to Google Sheet
+    fetch(GOOGLE_SCRIPT_URL, {
+      method: "POST",
+      mode: "no-cors",
+      body: JSON.stringify({
+        boss: bossName,
+        floor: floorName,
+        time: now.toISOString(),
+        respawn: respawnMinutes
+      })
+    });
+
+    // Discord Kill Alert
+    sendDiscordKillEmbed(bossName, floorName, respawnMinutes);
+  }
+
+  // ==============================
+  // TIMER HANDLER
+  // ==============================
+
+  function handleTimer(id) {
+    const display = document.getElementById(`time-${id}`);
+    if (!display) return;
+
+    const now = new Date().getTime();
+    const saved = localStorage.getItem(id);
+
+    if (saved) {
+      const diff = parseInt(saved) - now;
+
+      if (diff > 0) {
+        const h = Math.floor(diff / 3600000);
+        const m = Math.floor((diff % 3600000) / 60000);
+        const s = Math.floor((diff % 60000) / 1000);
+
+        display.innerHTML =
+          `${h}h ${m.toString().padStart(2, "0")}m ${s.toString().padStart(2, "0")}s`;
+
+        display.classList.add("counting");
+      } else {
+        display.innerHTML = "ALIVE";
+        display.classList.remove("counting");
+      }
+    }
+  }
+
+  function updateDisplay() {
+    floors.forEach(f => bosses.forEach(b => handleTimer(`${f}-${b}`)));
+    mykrielBosses.forEach(b => handleTimer(`mykriel-${b}`));
+  }
+
+  // ==============================
+  // DASHBOARD WITH EXACT SPAWN CLOCK
+  // ==============================
+
+  function updateNextSpawnDashboard() {
+    let upcoming = [];
+    const now = new Date().getTime();
+
+    function pushBoss(id, name, loc) {
+      const saved = localStorage.getItem(id);
+      if (!saved) return;
+
+      const diff = parseInt(saved) - now;
+      if (diff > 0) {
+        upcoming.push({ name, location: loc, timeLeft: diff });
+      }
+    }
+
+    floors.forEach(f =>
+      bosses.forEach(b => pushBoss(`${f}-${b}`, b, f))
+    );
+
+    mykrielBosses.forEach(b =>
+      pushBoss(`mykriel-${b}`, `Mykriel ${b}`, "mykriel")
+    );
+
+    upcoming.sort((a, b) => a.timeLeft - b.timeLeft);
+
+    const nextList = document.getElementById("next-list");
+
+    if (upcoming.length === 0) {
+      nextList.innerHTML = "No bosses currently on cooldown.";
+      return;
+    }
+
+    nextList.innerHTML = "";
+
+    upcoming.slice(0, 5).forEach((boss, index) => {
+      const mins = Math.floor(boss.timeLeft / 60000);
+      const secs = Math.floor((boss.timeLeft % 60000) / 1000);
+
+      const spawnDate = new Date(now + boss.timeLeft);
+      const exactTime = spawnDate.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit"
+      });
+
+      nextList.innerHTML += `
+        <div style="
+          padding: 12px;
+          border-radius: 10px;
+          border: 1px solid var(--border);
+          background: rgba(0,0,0,0.25);
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        ">
+          <div>
+            <b>#${index + 1} → ${boss.name}</b>
+            <span style="color: var(--gold);">
+              (${boss.location.toUpperCase()})
+            </span>
+            <br>
+            ⏳ ${mins}m ${secs}s left
+          </div>
+
+          <div style="font-size:0.9rem;color:var(--green);font-weight:bold;">
+            🕒 ${exactTime}
+          </div>
+        </div>
+      `;
+    });
+  }
+
+  // ==============================
+  // RUN LOOP
+  // ==============================
+
+  setInterval(() => {
+    updateDisplay();
+    updateNextSpawnDashboard();
+  }, 1000);
+
+  window.onload = () => {
+    updateDisplay();
+    updateNextSpawnDashboard();
+  };
+
+</script>
 </body>
 </html>
