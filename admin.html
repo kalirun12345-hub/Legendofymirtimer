@@ -65,6 +65,7 @@
 
 <h1>⚙️ Admin Dashboard</h1>
 
+<!-- RESET BOX -->
 <div class="box">
     <h3>🚨 Emergency Reset</h3>
     <p style="font-size: 0.8rem; color: #888;">
@@ -90,6 +91,7 @@
     <div id="resetStatus" class="status"></div>
 </div>
 
+<!-- SETTINGS BOX -->
 <div class="box">
     <h3>System Settings</h3>
 
@@ -99,11 +101,14 @@
     <button style="background: #3498db; margin-top:10px;" onclick="testPing()">
         Test Discord Connection
     </button>
+
+    <div id="pingStatus" class="status"></div>
 </div>
 
 <p><a href="index.html">← Back to Tracker</a></p>
 
 <script>
+    // ✅ Your Google Script URL
     const GOOGLE_SCRIPT_URL =
         "https://script.google.com/macros/s/AKfycbw4ie1gR4hr5yDlwBimiOPBNWTFFB08sv1aAnodEATR4O0Hk6jwg16otOr1l_7TCpol/exec";
 
@@ -118,7 +123,7 @@
         "69 CH1", "69 CH2"
     ];
 
-    // Populate Boss List Dynamically
+    // ✅ Populate Boss List Dynamically
     function updateBossList() {
         const floor = document.getElementById("resetFloor").value;
         const bossSelect = document.getElementById("resetBoss");
@@ -135,25 +140,26 @@
         });
     }
 
-    // Reset Boss Function
+    // ✅ Reset Boss Function (FIXED HEADERS)
     async function resetBoss() {
         const boss = document.getElementById("resetBoss").value;
         const floor = document.getElementById("resetFloor").value;
         const status = document.getElementById("resetStatus");
 
-        // Correct localStorage ID format
         const id = `${floor}-${boss}`;
 
         status.innerText = "Processing Reset...";
         status.style.color = "#d4af37";
 
-        // 1. Clear Local Timer
+        // Clear local timer
         localStorage.removeItem(id);
 
-        // 2. Tell Google Sheet to delete record
         try {
             await fetch(GOOGLE_SCRIPT_URL, {
                 method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
                 body: JSON.stringify({
                     type: "RESET_BOSS",
                     boss: boss,
@@ -161,23 +167,38 @@
                 })
             });
 
-            status.innerText = `SUCCESS: ${boss} (${floor}) is now ALIVE.`;
+            status.innerText = `✅ SUCCESS: ${boss} (${floor}) is now ALIVE.`;
             status.style.color = "#2ecc71";
 
         } catch (err) {
-            status.innerText = "Error: Could not reach Spreadsheet.";
+            status.innerText = "❌ Error: Could not reach Spreadsheet.";
             status.style.color = "#e74c3c";
         }
     }
 
-    // Test Discord Ping
+    // ✅ Test Discord Ping (FIXED HEADERS)
     async function testPing() {
-        fetch(GOOGLE_SCRIPT_URL, {
-            method: "POST",
-            body: JSON.stringify({ type: "TEST_WEBHOOK" })
-        });
+        const pingStatus = document.getElementById("pingStatus");
 
-        alert("Test ping sent to Discord!");
+        pingStatus.innerText = "Sending Test Ping...";
+        pingStatus.style.color = "#d4af37";
+
+        try {
+            await fetch(GOOGLE_SCRIPT_URL, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ type: "TEST_WEBHOOK" })
+            });
+
+            pingStatus.innerText = "✅ Discord Ping Sent Successfully!";
+            pingStatus.style.color = "#2ecc71";
+
+        } catch (err) {
+            pingStatus.innerText = "❌ Discord Ping Failed!";
+            pingStatus.style.color = "#e74c3c";
+        }
     }
 
     // Save Global Respawn Setting (Floors Only)
@@ -191,7 +212,7 @@
     document.getElementById("respawnMins").value =
         localStorage.getItem("respawn_setting") || 120;
 
-    // Run Once On Load
+    // Run once on load
     updateBossList();
 </script>
 
