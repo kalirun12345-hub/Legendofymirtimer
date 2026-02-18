@@ -1,0 +1,1901 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BabyRan Inferno — Play to Earn</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --fire1: #FF6B00;
+    --fire2: #FF3D00;
+    --fire3: #FFB300;
+    --fire4: #FF8C00;
+    --gold: #FFD700;
+    --gold2: #FFA500;
+    --ember: #FF4500;
+    --dark: #050505;
+    --dark2: #0D0000;
+    --dark3: #150800;
+    --dark4: #1A0A00;
+    --text: #F0E0D0;
+    --muted: #8A6A5A;
+    --teal: #00F5D4;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--dark);
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    overflow-x: hidden;
+  }
+
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: var(--dark); }
+  ::-webkit-scrollbar-thumb { background: var(--fire1); }
+
+  /* FIRE PARTICLES */
+  #fireCanvas {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* EMBER BG PATTERN */
+  .ember-bg {
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 100% 60% at 50% 0%, rgba(255,100,0,0.06) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 40% at 0% 100%, rgba(255,60,0,0.04) 0%, transparent 50%),
+      radial-gradient(ellipse 60% 40% at 100% 100%, rgba(255,150,0,0.04) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0; width: 100%;
+    padding: 0 48px;
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 100;
+    background: linear-gradient(to bottom, rgba(4,0,0,0.98) 0%, rgba(4,0,0,0.85) 100%);
+    border-bottom: 1px solid rgba(255,107,0,0.18);
+    box-shadow: 0 2px 40px rgba(255,60,0,0.08), 0 0 0 1px rgba(255,107,0,0.05);
+    backdrop-filter: blur(12px);
+  }
+
+  /* Animated fire line at top of nav */
+  nav::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg,
+      transparent 0%,
+      rgba(255,60,0,0.4) 10%,
+      var(--fire1) 30%,
+      var(--fire3) 50%,
+      var(--fire1) 70%,
+      rgba(255,60,0,0.4) 90%,
+      transparent 100%);
+    box-shadow: 0 0 12px rgba(255,107,0,0.6), 0 0 25px rgba(255,80,0,0.3);
+    animation: navFlame 3s ease-in-out infinite;
+  }
+  @keyframes navFlame {
+    0%, 100% { opacity: 0.8; }
+    50% { opacity: 1; box-shadow: 0 0 18px rgba(255,140,0,0.8), 0 0 35px rgba(255,80,0,0.4); }
+  }
+
+  /* Corner ornaments */
+  nav::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,60,0,0.15), transparent);
+  }
+
+  /* LOGO text mark */
+  .nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    position: relative;
+  }
+  .nav-logo-emblem {
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, var(--fire2), var(--fire3));
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    box-shadow: 0 0 14px rgba(255,100,0,0.6);
+    animation: emblemPulse 2.5s ease-in-out infinite;
+    flex-shrink: 0;
+  }
+  @keyframes emblemPulse {
+    0%, 100% { box-shadow: 0 0 12px rgba(255,100,0,0.5); }
+    50% { box-shadow: 0 0 22px rgba(255,140,0,0.9), 0 0 40px rgba(255,80,0,0.4); }
+  }
+  .nav-logo-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1;
+  }
+  .nav-logo-text .brand {
+    font-family: 'Cinzel Decorative', cursive;
+    font-size: 16px;
+    font-weight: 900;
+    background: linear-gradient(135deg, var(--fire3) 0%, var(--fire1) 50%, var(--gold) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: 2px;
+    text-shadow: none;
+    background-size: 200% auto;
+    animation: shimmer 3s linear infinite;
+  }
+  .nav-logo-text .sub {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 7.5px;
+    letter-spacing: 5px;
+    color: rgba(255,140,0,0.6);
+    margin-top: 2px;
+    text-transform: uppercase;
+  }
+
+  /* NAV LINKS */
+  nav ul {
+    list-style: none;
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+  nav ul li a {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 9.5px;
+    letter-spacing: 2px;
+    color: rgba(180,100,60,0.8);
+    text-decoration: none;
+    text-transform: uppercase;
+    padding: 8px 16px;
+    position: relative;
+    transition: color 0.3s;
+    display: block;
+  }
+  nav ul li a::before {
+    content: '';
+    position: absolute;
+    bottom: 4px; left: 50%; right: 50%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--fire3), transparent);
+    transition: left 0.3s, right 0.3s;
+  }
+  nav ul li a:hover { color: var(--fire3); }
+  nav ul li a:hover::before { left: 16px; right: 16px; box-shadow: 0 0 6px rgba(255,179,0,0.5); }
+
+  /* Separator dots */
+  nav ul li:not(:last-child)::after {
+    content: '◆';
+    color: rgba(255,80,0,0.2);
+    font-size: 6px;
+    margin-left: 0;
+  }
+
+  /* CTA BUTTON */
+  .nav-cta {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 9.5px;
+    letter-spacing: 2px;
+    padding: 0 24px;
+    height: 38px;
+    background: linear-gradient(135deg, var(--fire2) 0%, var(--fire1) 50%, var(--fire3) 100%);
+    background-size: 200% auto;
+    color: #060000;
+    font-weight: 900;
+    border: none;
+    cursor: pointer;
+    clip-path: polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%);
+    text-decoration: none;
+    text-transform: uppercase;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    transition: transform 0.2s, box-shadow 0.3s, background-position 0.5s;
+    box-shadow: 0 0 18px rgba(255,80,0,0.45), inset 0 1px 0 rgba(255,220,100,0.3);
+    animation: ctaPulse 2.5s ease-in-out infinite;
+  }
+  @keyframes ctaPulse {
+    0%, 100% { box-shadow: 0 0 15px rgba(255,80,0,0.4), inset 0 1px 0 rgba(255,220,100,0.2); }
+    50% { box-shadow: 0 0 30px rgba(255,100,0,0.7), 0 0 50px rgba(255,80,0,0.3), inset 0 1px 0 rgba(255,220,100,0.4); }
+  }
+  .nav-cta:hover {
+    transform: scale(1.04) translateY(-1px);
+    background-position: right center;
+  }
+  .nav-cta .cta-icon { font-size: 12px; }
+
+  /* HERO */
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 120px 20px 80px;
+    z-index: 1;
+    overflow: hidden;
+  }
+
+  .hero-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,107,0,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,107,0,0.03) 1px, transparent 1px);
+    background-size: 50px 50px;
+    mask-image: radial-gradient(ellipse at center, black 20%, transparent 70%);
+  }
+
+  /* LOGO IN HERO */
+  .hero-logo {
+    width: min(560px, 90vw);
+    margin-bottom: 8px;
+    position: relative;
+    z-index: 2;
+    filter: drop-shadow(0 0 30px rgba(255,100,0,0.5)) drop-shadow(0 0 60px rgba(255,60,0,0.3));
+    animation: logoFloat 4s ease-in-out infinite;
+  }
+  @keyframes logoFloat {
+    0%, 100% { transform: translateY(0px); filter: drop-shadow(0 0 30px rgba(255,100,0,0.5)) drop-shadow(0 0 60px rgba(255,60,0,0.3)); }
+    50% { transform: translateY(-8px); filter: drop-shadow(0 0 40px rgba(255,120,0,0.7)) drop-shadow(0 0 80px rgba(255,80,0,0.4)); }
+  }
+
+  .p2e-badge {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 10px;
+    letter-spacing: 4px;
+    color: var(--fire3);
+    border: 1px solid rgba(255,179,0,0.4);
+    padding: 7px 22px;
+    clip-path: polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%);
+    background: rgba(255,120,0,0.07);
+    margin-bottom: 20px;
+    display: inline-block;
+    animation: flameBadge 2s ease-in-out infinite;
+    position: relative;
+    z-index: 2;
+  }
+  @keyframes flameBadge {
+    0%, 100% { box-shadow: 0 0 10px rgba(255,179,0,0.3), inset 0 0 10px rgba(255,100,0,0.05); }
+    50% { box-shadow: 0 0 25px rgba(255,100,0,0.6), inset 0 0 20px rgba(255,80,0,0.1); }
+  }
+
+  .hero-tagline {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: clamp(15px, 2.5vw, 20px);
+    color: var(--muted);
+    max-width: 580px;
+    line-height: 1.7;
+    margin: 0 auto 36px;
+    font-weight: 500;
+    position: relative;
+    z-index: 2;
+  }
+  .hero-tagline strong { color: var(--fire3); }
+
+  .hero-btns {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 70px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .btn-fire {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 12px;
+    letter-spacing: 2px;
+    padding: 17px 44px;
+    background: linear-gradient(135deg, var(--fire2), var(--fire1), var(--fire3));
+    color: #080000;
+    font-weight: 900;
+    border: none;
+    cursor: pointer;
+    clip-path: polygon(14px 0%, 100% 0%, calc(100% - 14px) 100%, 0% 100%);
+    text-decoration: none;
+    display: inline-block;
+    transition: transform 0.2s, box-shadow 0.3s;
+    text-transform: uppercase;
+    animation: fireBtnPulse 2.5s ease-in-out infinite;
+  }
+  @keyframes fireBtnPulse {
+    0%, 100% { box-shadow: 0 0 20px rgba(255,80,0,0.5), 0 4px 20px rgba(255,60,0,0.3); }
+    50% { box-shadow: 0 0 40px rgba(255,100,0,0.8), 0 6px 30px rgba(255,80,0,0.5); }
+  }
+  .btn-fire:hover { transform: scale(1.06) translateY(-2px); }
+
+  .btn-outline {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 12px;
+    letter-spacing: 2px;
+    padding: 15px 42px;
+    background: transparent;
+    color: var(--fire4);
+    font-weight: 700;
+    border: 1px solid rgba(255,140,0,0.5);
+    cursor: pointer;
+    clip-path: polygon(14px 0%, 100% 0%, calc(100% - 14px) 100%, 0% 100%);
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.3s;
+    text-transform: uppercase;
+  }
+  .btn-outline:hover {
+    background: rgba(255,107,0,0.1);
+    box-shadow: 0 0 25px rgba(255,107,0,0.4);
+    transform: scale(1.05);
+  }
+
+  /* STATS */
+  .stats-row {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    position: relative;
+    z-index: 2;
+    gap: 0;
+    border: 1px solid rgba(255,107,0,0.15);
+    background: rgba(255,60,0,0.03);
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  .stat {
+    padding: 22px 44px;
+    text-align: center;
+    position: relative;
+  }
+  .stat:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    right: 0; top: 20%; bottom: 20%;
+    width: 1px;
+    background: rgba(255,107,0,0.2);
+  }
+  .stat-n {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 26px;
+    font-weight: 900;
+    color: var(--fire3);
+    display: block;
+    text-shadow: 0 0 15px rgba(255,179,0,0.5);
+  }
+  .stat-l {
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--muted);
+    text-transform: uppercase;
+    font-family: 'Orbitron', sans-serif;
+    margin-top: 4px;
+    display: block;
+  }
+
+  /* SECTION SHARED */
+  .sec {
+    position: relative;
+    z-index: 1;
+    padding: 100px 40px;
+  }
+  .sec-inner { max-width: 1160px; margin: 0 auto; }
+  .sec-head { text-align: center; margin-bottom: 56px; }
+  .sec-tag {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 9px;
+    letter-spacing: 4px;
+    color: var(--fire1);
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 12px;
+  }
+  .sec-title {
+    font-family: 'Cinzel Decorative', cursive;
+    font-size: clamp(22px, 3.5vw, 38px);
+    background: linear-gradient(135deg, var(--fire3), var(--fire1), var(--gold));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-size: 200% auto;
+    animation: shimmer 4s linear infinite;
+    margin-bottom: 14px;
+  }
+  @keyframes shimmer {
+    0% { background-position: 0% center; }
+    100% { background-position: 200% center; }
+  }
+  .sec-sub {
+    color: var(--muted);
+    max-width: 500px;
+    margin: 0 auto;
+    font-size: 15px;
+    line-height: 1.7;
+  }
+  .flame-divider {
+    width: 100px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--fire1), var(--fire3), var(--fire1), transparent);
+    margin: 18px auto 0;
+    box-shadow: 0 0 8px rgba(255,107,0,0.4);
+  }
+
+  /* SERVER SECTION */
+  .servers { background: linear-gradient(180deg, var(--dark) 0%, var(--dark3) 50%, var(--dark) 100%); }
+
+  .srv-grid {
+    display: grid;
+    grid-template-columns: 1.15fr 0.85fr;
+    gap: 16px;
+    max-width: 1100px;
+    margin: 0 auto;
+    align-items: start;
+  }
+
+  /* ── ASIA 1 ── */
+  .srv-card {
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s;
+  }
+  .srv-card.asia1 {
+    padding: 44px 40px;
+    background: linear-gradient(145deg, rgba(255,60,0,0.1), rgba(255,140,0,0.05), rgba(5,0,0,0.97));
+    border: 1px solid rgba(255,100,0,0.3);
+  }
+  .srv-card.asia1:hover { transform: translateY(-4px); }
+  .srv-card.asia1::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--fire2), var(--fire3), var(--fire1), transparent);
+    box-shadow: 0 0 14px rgba(255,107,0,0.6);
+  }
+
+  .asia1-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .server-region-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(0,230,118,0.08);
+    border: 1px solid rgba(0,230,118,0.2);
+    padding: 6px 14px;
+    clip-path: polygon(5px 0%, 100% 0%, calc(100% - 5px) 100%, 0% 100%);
+  }
+
+  /* Dual mode cards inside ASIA 1 */
+  .dual-modes {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin: 22px 0 26px;
+    border: 1px solid rgba(255,107,0,0.15);
+  }
+  .mode-card {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    padding: 16px 18px;
+    background: rgba(255,60,0,0.04);
+    transition: background 0.3s;
+  }
+  .mode-card:hover { background: rgba(255,60,0,0.08); }
+  .mode-card:not(:last-child) { border-bottom: 1px solid rgba(255,107,0,0.12); }
+  .mode-icon { font-size: 26px; flex-shrink: 0; margin-top: 2px; }
+  .mode-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--fire3);
+    text-transform: uppercase;
+    margin-bottom: 5px;
+  }
+  .mode-desc { color: var(--muted); font-size: 13px; line-height: 1.6; }
+  .mode-divider {
+    text-align: center;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 13px;
+    color: rgba(255,107,0,0.4);
+    padding: 6px;
+    background: rgba(255,60,0,0.03);
+    border-bottom: 1px solid rgba(255,107,0,0.12);
+    letter-spacing: 4px;
+  }
+
+  /* ── ASIA 2 COMING SOON ── */
+  .srv-card.asia2 {
+    min-height: 520px;
+    border: 1px solid rgba(255,107,0,0.12);
+    background: rgba(5,0,0,0.9);
+  }
+  .soon-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 36px 32px;
+    background:
+      linear-gradient(145deg, rgba(20,5,0,0.97), rgba(10,2,0,0.99)),
+      repeating-linear-gradient(
+        45deg,
+        rgba(255,60,0,0.02) 0px,
+        rgba(255,60,0,0.02) 2px,
+        transparent 2px,
+        transparent 12px
+      );
+  }
+  .soon-content { text-align: center; width: 100%; }
+  .soon-badge {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 9px;
+    letter-spacing: 3px;
+    color: rgba(180,80,0,0.7);
+    border: 1px solid rgba(255,107,0,0.18);
+    padding: 7px 18px;
+    clip-path: polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%);
+    background: rgba(255,60,0,0.04);
+    display: inline-block;
+    margin-bottom: 20px;
+    animation: lockedPulse 3s ease-in-out infinite;
+  }
+  @keyframes lockedPulse {
+    0%, 100% { border-color: rgba(255,107,0,0.18); color: rgba(180,80,0,0.7); }
+    50% { border-color: rgba(255,107,0,0.4); color: rgba(255,140,0,0.9); box-shadow: 0 0 14px rgba(255,80,0,0.15); }
+  }
+  .soon-title {
+    font-family: 'Cinzel Decorative', cursive;
+    font-size: 28px;
+    color: rgba(200,100,50,0.5);
+    margin-bottom: 14px;
+    letter-spacing: 2px;
+  }
+  .soon-desc {
+    color: rgba(120,70,50,0.8);
+    font-size: 14px;
+    line-height: 1.7;
+    margin-bottom: 24px;
+    max-width: 280px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .soon-features {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 28px;
+  }
+  .soon-feat {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 8px;
+    letter-spacing: 1px;
+    color: rgba(180,80,0,0.6);
+    border: 1px solid rgba(255,60,0,0.1);
+    padding: 9px 8px;
+    text-align: center;
+    background: rgba(255,40,0,0.03);
+    text-transform: uppercase;
+  }
+  .notify-box {
+    display: flex;
+    gap: 0;
+    margin-bottom: 12px;
+  }
+  .notify-input {
+    flex: 1;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,107,0,0.2);
+    border-right: none;
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 13px;
+    padding: 11px 14px;
+    outline: none;
+    transition: border-color 0.3s;
+  }
+  .notify-input::placeholder { color: rgba(140,80,50,0.5); }
+  .notify-input:focus { border-color: rgba(255,107,0,0.5); }
+  .notify-btn {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 9px;
+    letter-spacing: 1px;
+    padding: 11px 18px;
+    background: linear-gradient(135deg, var(--fire2), var(--fire1));
+    color: #060000;
+    font-weight: 900;
+    border: none;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: box-shadow 0.3s;
+    white-space: nowrap;
+  }
+  .notify-btn:hover { box-shadow: 0 0 18px rgba(255,80,0,0.5); }
+  .soon-note {
+    font-size: 11px;
+    color: rgba(120,70,50,0.6);
+    font-family: 'Orbitron', sans-serif;
+    letter-spacing: 1px;
+  }
+
+  .srv-icon { font-size: 44px; margin-bottom: 18px; display: block; }
+  .srv-badge {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 8px;
+    letter-spacing: 3px;
+    padding: 5px 16px;
+    clip-path: polygon(5px 0%, 100% 0%, calc(100% - 5px) 100%, 0% 100%);
+    display: inline-block;
+    margin-bottom: 16px;
+    background: rgba(255,107,0,0.12);
+    color: var(--fire3);
+    border: 1px solid rgba(255,107,0,0.3);
+    text-transform: uppercase;
+  }
+  .srv-name {
+    font-family: 'Cinzel Decorative', cursive;
+    font-size: 24px;
+    margin-bottom: 12px;
+    color: var(--fire3);
+    text-shadow: 0 0 20px rgba(255,140,0,0.3);
+  }
+  .srv-desc {
+    color: var(--muted);
+    font-size: 15px;
+    line-height: 1.7;
+    margin-bottom: 26px;
+  }
+  .feat-list {
+    list-style: none;
+    margin-bottom: 30px;
+  }
+  .feat-list li {
+    padding: 9px 0;
+    font-size: 15px;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid rgba(255,107,0,0.07);
+  }
+  .feat-list li:last-child { border-bottom: none; }
+  .feat-list li::before { content: '🔥'; font-size: 13px; }
+
+  .online-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 24px;
+  }
+  .odot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #00E676;
+    box-shadow: 0 0 8px #00E676;
+    animation: blink 1.5s ease-in-out infinite;
+    flex-shrink: 0;
+  }
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+  .online-txt {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 10px;
+    letter-spacing: 1px;
+    color: #00E676;
+  }
+
+  .srv-btn {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 10px;
+    letter-spacing: 2px;
+    padding: 14px 32px;
+    font-weight: 900;
+    border: none;
+    cursor: pointer;
+    clip-path: polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%);
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.3s;
+    text-transform: uppercase;
+    background: linear-gradient(135deg, var(--fire2), var(--fire1), var(--fire3));
+    color: #080000;
+  }
+  .srv-btn:hover { box-shadow: 0 0 30px rgba(255,100,0,0.6); transform: scale(1.05); }
+
+  /* P2E */
+  .p2e { background: var(--dark2); }
+  .p2e-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 2px;
+    max-width: 1060px;
+    margin: 0 auto;
+  }
+  .p2e-card {
+    padding: 38px 26px;
+    background: rgba(255,80,0,0.03);
+    border: 1px solid rgba(255,107,0,0.1);
+    text-align: center;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+  .p2e-card:hover {
+    background: rgba(255,80,0,0.07);
+    border-color: rgba(255,107,0,0.3);
+    transform: translateY(-4px);
+    box-shadow: 0 8px 30px rgba(255,80,0,0.1);
+  }
+  .p2e-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--fire1), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .p2e-card:hover::after { opacity: 1; }
+  .p2e-ico { font-size: 34px; margin-bottom: 14px; display: block; }
+  .p2e-card h3 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--fire3);
+    margin-bottom: 10px;
+    text-transform: uppercase;
+  }
+  .p2e-card p { color: var(--muted); font-size: 14px; line-height: 1.6; }
+
+  /* STEPS */
+  .howto { background: var(--dark); }
+  .howto-inner {
+    max-width: 820px;
+    margin: 0 auto;
+  }
+  .steps { position: relative; margin-top: 56px; }
+  .steps::before {
+    content: '';
+    position: absolute;
+    left: 27px; top: 0; bottom: 0;
+    width: 1px;
+    background: linear-gradient(180deg, var(--fire2), var(--fire3), var(--fire1), var(--fire2));
+    box-shadow: 0 0 8px rgba(255,107,0,0.4);
+  }
+  .step {
+    display: flex;
+    gap: 28px;
+    padding: 22px 0;
+    align-items: flex-start;
+  }
+  .step-n {
+    width: 54px; height: 54px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 17px;
+    font-weight: 900;
+    color: #060000;
+    background: linear-gradient(135deg, var(--fire2), var(--fire3));
+    clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+    z-index: 1;
+    box-shadow: 0 0 16px rgba(255,107,0,0.5);
+  }
+  .step-c h3 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 12px;
+    letter-spacing: 1px;
+    color: var(--fire3);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+  }
+  .step-c p { color: var(--muted); line-height: 1.7; font-size: 15px; }
+
+  /* EVENTS */
+  .events { background: var(--dark3); }
+  .ev-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+    gap: 14px;
+    max-width: 1060px;
+    margin: 0 auto;
+  }
+  .ev-card {
+    padding: 26px;
+    border: 1px solid rgba(255,255,255,0.05);
+    background: rgba(255,60,0,0.02);
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s;
+  }
+  .ev-card:hover {
+    border-color: rgba(255,107,0,0.25);
+    background: rgba(255,60,0,0.05);
+    transform: translateY(-4px);
+    box-shadow: 0 8px 30px rgba(255,80,0,0.08);
+  }
+  .ev-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px; height: 100%;
+    background: linear-gradient(180deg, var(--fire2), var(--fire3), var(--fire1));
+    box-shadow: 0 0 10px rgba(255,107,0,0.4);
+  }
+  .ev-time {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 8px;
+    letter-spacing: 3px;
+    color: var(--fire1);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    display: block;
+  }
+  .ev-card h3 {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+  .ev-card p { color: var(--muted); font-size: 14px; line-height: 1.6; }
+  .ev-reward {
+    margin-top: 14px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 10px;
+    color: var(--fire3);
+    letter-spacing: 1px;
+  }
+
+  /* DOWNLOAD */
+  .download {
+    background: var(--dark);
+    text-align: center;
+    padding: 100px 40px;
+    position: relative;
+    overflow: hidden;
+  }
+  .download::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,107,0,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,107,0,0.03) 1px, transparent 1px);
+    background-size: 44px 44px;
+  }
+  .dl-glow {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 600px; height: 400px;
+    background: radial-gradient(ellipse, rgba(255,80,0,0.07) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .dl-inner {
+    position: relative;
+    z-index: 1;
+    max-width: 680px;
+    margin: 0 auto;
+  }
+  .dl-logo {
+    width: min(320px, 70vw);
+    margin-bottom: 24px;
+    filter: drop-shadow(0 0 20px rgba(255,100,0,0.5));
+  }
+  .dl-inner h2 {
+    font-family: 'Cinzel Decorative', cursive;
+    font-size: clamp(20px, 3.5vw, 36px);
+    background: linear-gradient(135deg, var(--fire3), var(--fire1));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 14px;
+  }
+  .dl-inner p { color: var(--muted); margin-bottom: 40px; font-size: 16px; line-height: 1.7; }
+  .dl-btns { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+  .dl-btn {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px;
+    letter-spacing: 2px;
+    padding: 16px 38px;
+    font-weight: 900;
+    border: none;
+    cursor: pointer;
+    clip-path: polygon(12px 0%, 100% 0%, calc(100% - 12px) 100%, 0% 100%);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.3s;
+    text-transform: uppercase;
+  }
+  .dl-btn.pc {
+    background: linear-gradient(135deg, var(--fire2), var(--fire1), var(--fire3));
+    color: #060000;
+    box-shadow: 0 0 20px rgba(255,80,0,0.4);
+  }
+  .dl-btn.pc:hover { box-shadow: 0 0 40px rgba(255,100,0,0.7); transform: scale(1.05); }
+  .dl-btn.apk {
+    background: transparent;
+    color: var(--fire4);
+    border: 1px solid rgba(255,140,0,0.4);
+  }
+  .dl-btn.apk:hover { background: rgba(255,107,0,0.1); box-shadow: 0 0 20px rgba(255,107,0,0.3); transform: scale(1.05); }
+
+  /* FOOTER */
+  footer {
+    background: rgba(0,0,0,0.6);
+    padding: 44px 40px;
+    text-align: center;
+    border-top: 1px solid rgba(255,107,0,0.12);
+    position: relative;
+    z-index: 1;
+  }
+  .footer-logo img {
+    height: 56px;
+    filter: drop-shadow(0 0 10px rgba(255,107,0,0.5));
+    margin-bottom: 20px;
+  }
+  .ft-links {
+    display: flex;
+    gap: 28px;
+    justify-content: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .ft-links a {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: var(--muted);
+    text-decoration: none;
+    text-transform: uppercase;
+    transition: color 0.3s;
+  }
+  .ft-links a:hover { color: var(--fire3); }
+  .socials {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+  .soc {
+    width: 40px; height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255,107,0,0.2);
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 15px;
+    transition: all 0.3s;
+    clip-path: polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%);
+  }
+  .soc:hover { background: rgba(255,107,0,0.12); color: var(--fire3); border-color: var(--fire1); box-shadow: 0 0 14px rgba(255,107,0,0.3); }
+  footer p { color: var(--muted); font-size: 12px; line-height: 1.8; }
+
+  @media (max-width: 768px) {
+    nav ul { display: none; }
+    .srv-grid { grid-template-columns: 1fr; }
+    .srv-card.asia2 { min-height: 480px; }
+    .sec { padding: 70px 20px; }
+    nav { padding: 14px 20px; }
+  }
+
+  /* ══════════════════════════════════
+     EXTRA EFFECTS
+  ══════════════════════════════════ */
+
+  /* Custom fire cursor */
+  body { cursor: none; }
+  #cursor {
+    position: fixed;
+    width: 14px; height: 14px;
+    background: radial-gradient(circle, #FFD700 0%, #FF6B00 50%, transparent 100%);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    transition: transform 0.05s;
+    box-shadow: 0 0 10px #FF6B00, 0 0 20px rgba(255,107,0,0.5);
+    mix-blend-mode: screen;
+  }
+  #cursor-trail {
+    position: fixed;
+    pointer-events: none;
+    z-index: 9998;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+  }
+
+  /* Lava crack overlay on hero */
+  .lava-cracks {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+  }
+  .crack {
+    position: absolute;
+    background: linear-gradient(var(--angle, 45deg), transparent 40%, rgba(255,80,0,0.4) 50%, transparent 60%);
+    opacity: 0;
+    animation: crackFlash var(--dur, 6s) ease-in-out var(--delay, 0s) infinite;
+  }
+  @keyframes crackFlash {
+    0%, 85%, 100% { opacity: 0; }
+    88%, 92% { opacity: 0.6; }
+    90% { opacity: 1; }
+  }
+
+  /* Scroll-reveal */
+  .reveal {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .reveal-left {
+    opacity: 0;
+    transform: translateX(-50px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .reveal-left.visible { opacity: 1; transform: translateX(0); }
+  .reveal-right {
+    opacity: 0;
+    transform: translateX(50px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .reveal-right.visible { opacity: 1; transform: translateX(0); }
+
+  /* Stagger delays for grid children */
+  .p2e-card:nth-child(1) { transition-delay: 0.05s; }
+  .p2e-card:nth-child(2) { transition-delay: 0.12s; }
+  .p2e-card:nth-child(3) { transition-delay: 0.19s; }
+  .p2e-card:nth-child(4) { transition-delay: 0.26s; }
+  .p2e-card:nth-child(5) { transition-delay: 0.33s; }
+  .p2e-card:nth-child(6) { transition-delay: 0.40s; }
+
+  /* Lightning bolt effect */
+  #lightning-canvas {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 5;
+    opacity: 0;
+    transition: opacity 0.05s;
+  }
+
+  /* Vignette fire border around screen */
+  .fire-vignette {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 4;
+    background:
+      radial-gradient(ellipse 100% 100% at 50% 50%, transparent 55%, rgba(180,30,0,0.18) 80%, rgba(120,10,0,0.35) 100%);
+    animation: vignetteBreath 4s ease-in-out infinite;
+  }
+  @keyframes vignetteBreath {
+    0%, 100% { opacity: 0.7; }
+    50% { opacity: 1; }
+  }
+
+  /* Glowing section dividers */
+  .fire-sep {
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,80,0,0.1), rgba(255,140,0,0.5), rgba(255,80,0,0.1), transparent);
+    position: relative;
+    overflow: visible;
+  }
+  .fire-sep::after {
+    content: '🔥';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 18px;
+    filter: drop-shadow(0 0 8px rgba(255,100,0,0.8));
+    animation: sepPulse 2s ease-in-out infinite;
+  }
+  @keyframes sepPulse {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); }
+    50% { transform: translate(-50%, -50%) scale(1.3); filter: drop-shadow(0 0 14px rgba(255,150,0,1)); }
+  }
+
+  /* Floating rune particles */
+  .rune {
+    position: fixed;
+    pointer-events: none;
+    font-size: 14px;
+    color: rgba(255,107,0,0.3);
+    animation: runeFloat linear infinite;
+    z-index: 1;
+    user-select: none;
+  }
+  @keyframes runeFloat {
+    0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+    10% { opacity: 0.5; }
+    90% { opacity: 0.2; }
+    100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
+  }
+
+  /* Hero text glitch effect */
+  @keyframes glitch1 {
+    0%, 90%, 100% { clip-path: none; transform: none; }
+    92% { clip-path: inset(20% 0 60% 0); transform: translate(-3px, 0); }
+    94% { clip-path: inset(60% 0 10% 0); transform: translate(3px, 0); }
+    96% { clip-path: none; transform: none; }
+  }
+  .hero-logo { animation: logoFloat 4s ease-in-out infinite, logoGlitch 8s ease-in-out infinite; }
+  @keyframes logoGlitch {
+    0%, 88%, 100% { filter: drop-shadow(0 0 30px rgba(255,100,0,0.5)) drop-shadow(0 0 60px rgba(255,60,0,0.3)); }
+    90% { filter: drop-shadow(0 0 30px rgba(255,100,0,0.5)) drop-shadow(4px 0 0 rgba(255,0,0,0.4)) drop-shadow(-4px 0 0 rgba(0,200,255,0.2)); }
+    91% { filter: drop-shadow(0 0 40px rgba(255,120,0,0.7)); }
+  }
+
+  /* Heat shimmer on server cards */
+  @keyframes heatShimmer {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+
+  /* Pulse rings on P2E icons */
+  .p2e-card:hover .p2e-ico::after {
+    content: '';
+    position: absolute;
+    inset: -8px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,107,0,0.4);
+    animation: ringPulse 0.6s ease-out forwards;
+  }
+  @keyframes ringPulse {
+    0% { transform: scale(0.8); opacity: 1; }
+    100% { transform: scale(2); opacity: 0; }
+  }
+  .p2e-ico { position: relative; display: inline-block; }
+
+  /* Screen edge fire lick */
+  .edge-fire-left, .edge-fire-right {
+    position: fixed;
+    top: 0; bottom: 0;
+    width: 6px;
+    pointer-events: none;
+    z-index: 3;
+    animation: edgeFire 3s ease-in-out infinite;
+  }
+  .edge-fire-left {
+    left: 0;
+    background: linear-gradient(to right, rgba(255,60,0,0.15), transparent);
+  }
+  .edge-fire-right {
+    right: 0;
+    background: linear-gradient(to left, rgba(255,60,0,0.15), transparent);
+  }
+  @keyframes edgeFire {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+  }
+
+  /* Particle burst on button click */
+  .burst-particle {
+    position: fixed;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    animation: burst 0.8s ease-out forwards;
+  }
+  @keyframes burst {
+    0% { transform: translate(0,0) scale(1); opacity: 1; }
+    100% { transform: translate(var(--bx), var(--by)) scale(0); opacity: 0; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="fireCanvas"></canvas>
+<canvas id="lightning-canvas" style="position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:5;"></canvas>
+<div class="ember-bg"></div>
+<div class="fire-vignette"></div>
+<div class="edge-fire-left"></div>
+<div class="edge-fire-right"></div>
+<div id="cursor"></div>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">
+    <div class="nav-logo-emblem">🔥</div>
+    <div class="nav-logo-text">
+      <span class="brand">BabyRan</span>
+      <span class="sub">Inferno</span>
+    </div>
+  </a>
+
+  <ul>
+    <li><a href="#servers">Servers</a></li>
+    <li><a href="#p2e">Play to Earn</a></li>
+    <li><a href="#events">Events</a></li>
+    <li><a href="#download">Download</a></li>
+  </ul>
+
+  <a href="#download" class="nav-cta">
+    <span class="cta-icon">⚔</span>
+    Play Now
+  </a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-grid"></div>
+
+  <img
+    src="/mnt/user-data/uploads/1771381898467_31cd4aba-a74d-4e8b-b43d-ee696a59b4f9.png"
+    alt="BabyRan Inferno"
+    class="hero-logo"
+  >
+
+  <div class="p2e-badge">🔥 PLAY TO EARN 🔥</div>
+
+  <p class="hero-tagline">
+    The ultimate <strong>Ran Online private server</strong> reborn in flames.<br>
+    Choose your path — <strong>Combo Base</strong> or <strong>Hunt Base</strong> — and earn real rewards as you rise.
+  </p>
+
+  <div class="hero-btns">
+    <a href="#download" class="btn-fire">⚔ Enter the Inferno</a>
+    <a href="#servers" class="btn-outline">◈ View Servers</a>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat">
+      <span class="stat-n" data-count="2400">2,400+</span>
+      <span class="stat-l">Active Players</span>
+    </div>
+    <div class="stat">
+      <span class="stat-n">2</span>
+      <span class="stat-l">Game Servers</span>
+    </div>
+    <div class="stat">
+      <span class="stat-n">24/7</span>
+      <span class="stat-l">Online & Stable</span>
+    </div>
+    <div class="stat">
+      <span class="stat-n">FREE</span>
+      <span class="stat-l">To Play</span>
+    </div>
+  </div>
+</section>
+
+<!-- SERVERS -->
+<section class="sec servers" id="servers">
+  <div class="sec-inner">
+    <div class="sec-head reveal">
+      <span class="sec-tag">Choose Your Path</span>
+      <h2 class="sec-title">Two Infernal Servers</h2>
+      <p class="sec-sub">Both servers burn with the same fire — pick the gameplay style that suits your warrior soul.</p>
+      <div class="flame-divider"></div>
+    </div>
+
+    <div class="srv-grid">
+
+      <!-- ASIA 1 — LIVE -->
+      <div class="srv-card asia1 reveal-left">
+        <div class="asia1-top">
+          <div class="server-region-badge">
+            <span class="odot"></span>
+            <span class="online-txt">LIVE — ASIA 1</span>
+          </div>
+          <span class="srv-badge">Now Available</span>
+        </div>
+
+        <h2 class="srv-name">🌏 ASIA 1</h2>
+        <p class="srv-desc">The first and only active BabyRan Inferno server — battle-tested and packed with thousands of warriors. ASIA 1 features <strong style="color:var(--fire3)">both Combo Base and Hunt Base</strong> gameplay in one blazing server.</p>
+
+        <div class="dual-modes">
+          <div class="mode-card">
+            <span class="mode-icon">⚔️</span>
+            <div>
+              <div class="mode-title">Combo Base</div>
+              <div class="mode-desc">Chain combos, PvP arenas, Guild Wars, ranked leaderboards & weekly tournaments.</div>
+            </div>
+          </div>
+          <div class="mode-divider">✦ &nbsp; PLUS &nbsp; ✦</div>
+          <div class="mode-card">
+            <span class="mode-icon">🏹</span>
+            <div>
+              <div class="mode-title">Hunt Base</div>
+              <div class="mode-desc">Elite monster farming, rare drops, player economy, dungeon raids & crafting.</div>
+            </div>
+          </div>
+        </div>
+
+        <ul class="feat-list">
+          <li>High-Rate EXP & Drop</li>
+          <li>Combo Skill System Enabled</li>
+          <li>Elite Monster Hunting & Rare Drops</li>
+          <li>Guild Wars, PvP Arenas & Castle Siege</li>
+          <li>Player-Driven Economy & Crafting</li>
+          <li>Weekly Tournaments & Boss Raids</li>
+          <li>Play to Earn — Real Rewards</li>
+        </ul>
+
+        <div class="online-row" style="margin-bottom:28px;">
+          <span class="odot"></span>
+          <span class="online-txt">ONLINE — 2,400+ Active Players</span>
+        </div>
+        <a href="#download" class="srv-btn" style="padding:16px 44px; font-size:11px;">⚔ Play on ASIA 1</a>
+      </div>
+
+      <!-- ASIA 2 — COMING SOON -->
+      <div class="srv-card asia2 reveal-right">
+        <div class="soon-overlay">
+          <div class="soon-content">
+            <div class="soon-badge">🔒 &nbsp; COMING SOON</div>
+            <h2 class="soon-title">🌏 ASIA 2</h2>
+            <p class="soon-desc">The second server is rising from the flames. ASIA 2 will bring fresh rankings, a new economy, and an even more intense battlefield.</p>
+            <div class="soon-features">
+              <div class="soon-feat">⚔ New Economy</div>
+              <div class="soon-feat">🏆 Fresh Rankings</div>
+              <div class="soon-feat">🔥 Enhanced Rates</div>
+              <div class="soon-feat">🌐 Cross-Server Events</div>
+            </div>
+            <div class="notify-box">
+              <input type="email" class="notify-input" placeholder="Your email...">
+              <button class="notify-btn">Notify Me</button>
+            </div>
+            <p class="soon-note">Be first to know when ASIA 2 ignites.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+<div class="fire-sep" style="margin:0;"></div>
+
+<!-- P2E -->
+<section class="sec p2e" id="p2e">
+  <div class="sec-inner">
+    <div class="sec-head reveal">
+      <span class="sec-tag">Real Rewards</span>
+      <h2 class="sec-title">Play to Earn</h2>
+      <p class="sec-sub">Your skill and grind are worth real rewards. BabyRan Inferno pays dedicated players.</p>
+      <div class="flame-divider"></div>
+    </div>
+    <div class="p2e-grid">
+      <div class="p2e-card reveal">
+        <span class="p2e-ico">💰</span>
+        <h3>Earn Gold</h3>
+        <p>Hunt monsters, complete quests and win events to earn in-game gold with real value.</p>
+      </div>
+      <div class="p2e-card reveal">
+        <span class="p2e-ico">💎</span>
+        <h3>Rare Items</h3>
+        <p>Farm and trade legendary equipment. Top gear holds real market value in our player economy.</p>
+      </div>
+      <div class="p2e-card reveal">
+        <span class="p2e-ico">🏆</span>
+        <h3>Tournament Prizes</h3>
+        <p>Weekly and monthly PvP & PvE tournaments with cash prizes and exclusive rewards.</p>
+      </div>
+      <div class="p2e-card reveal">
+        <span class="p2e-ico">🎟️</span>
+        <h3>Event Tokens</h3>
+        <p>Earn tokens through daily quests and special events. Redeem in the exclusive P2E shop.</p>
+      </div>
+      <div class="p2e-card reveal">
+        <span class="p2e-ico">🤝</span>
+        <h3>Referral Rewards</h3>
+        <p>Invite friends and earn bonus credits for every active player you recruit.</p>
+      </div>
+      <div class="p2e-card reveal">
+        <span class="p2e-ico">🌐</span>
+        <h3>Player Market</h3>
+        <p>Buy, sell and trade items freely. The entire economy is player-driven.</p>
+      </div>
+    </div>
+  </div>
+</section>
+<div class="fire-sep" style="margin:0;"></div>
+
+<!-- HOW TO PLAY -->
+<section class="sec howto" id="howto">
+  <div class="howto-inner">
+    <div class="sec-head reveal">
+      <span class="sec-tag">Getting Started</span>
+      <h2 class="sec-title">How to Play</h2>
+      <div class="flame-divider"></div>
+    </div>
+    <div class="steps">
+      <div class="step reveal">
+        <div class="step-n">01</div>
+        <div class="step-c">
+          <h3>Register Your Account</h3>
+          <p>Create your free BabyRan Inferno account. Sign up in less than a minute — no credit card needed.</p>
+        </div>
+      </div>
+      <div class="step reveal">
+        <div class="step-n">02</div>
+        <div class="step-c">
+          <h3>Download the Client</h3>
+          <p>Download and install the BabyRan Inferno game client for Windows PC or Android mobile device.</p>
+        </div>
+      </div>
+      <div class="step reveal">
+        <div class="step-n">03</div>
+        <div class="step-c">
+          <h3>Choose Your Server</h3>
+          <p>Select the <strong style="color:var(--fire3)">Combo Base Server</strong> for PvP intensity or the <strong style="color:var(--fire3)">Hunt Base Server</strong> for farming and economy play.</p>
+        </div>
+      </div>
+      <div class="step reveal">
+        <div class="step-n">04</div>
+        <div class="step-c">
+          <h3>Create Your Character</h3>
+          <p>Pick your school, customize your fighter, and choose your combat style — Swordsman, Brawler, or more.</p>
+        </div>
+      </div>
+      <div class="step reveal">
+        <div class="step-n">05</div>
+        <div class="step-c">
+          <h3>Hunt, Earn & Dominate</h3>
+          <p>Battle monsters, complete quests, join guild wars, and climb the rankings. Your earnings start now.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<div class="fire-sep" style="margin:0;"></div>
+
+<!-- EVENTS -->
+<section class="sec events" id="events">
+  <div class="sec-inner">
+    <div class="sec-head reveal">
+      <span class="sec-tag">Live & Upcoming</span>
+      <h2 class="sec-title">Inferno Events</h2>
+      <p class="sec-sub">Regular events keep the flame burning and reward active warriors generously.</p>
+      <div class="flame-divider"></div>
+    </div>
+    <div class="ev-grid">
+      <div class="ev-card reveal">
+        <span class="ev-time">🔴 LIVE NOW</span>
+        <h3>Boss Raid: Dark Dragon</h3>
+        <p>Team up and slay the Dark Dragon in the Chaos Dungeon. Massive loot for top damage dealers.</p>
+        <div class="ev-reward">🏆 Dragon Armor Set + 50,000 Gold</div>
+      </div>
+      <div class="ev-card reveal">
+        <span class="ev-time">⏰ EVERY WEEKEND</span>
+        <h3>PvP Colosseum</h3>
+        <p>Battle through the weekly PvP tournament bracket. Open to all players in both servers.</p>
+        <div class="ev-reward">🏆 Tournament Medal + Cash Prize</div>
+      </div>
+      <div class="ev-card reveal">
+        <span class="ev-time">📅 EVERY DAY</span>
+        <h3>Daily Quest Bonanza</h3>
+        <p>Complete daily missions to earn Event Tokens, bonus EXP boosts, and rare item fragments.</p>
+        <div class="ev-reward">🏆 Event Tokens + EXP Boost x2</div>
+      </div>
+      <div class="ev-card reveal">
+        <span class="ev-time">📅 MONTHLY</span>
+        <h3>Top Hunter Rankings</h3>
+        <p>Top 10 monster hunters on the Hunt Server each month receive legendary gear and gold.</p>
+        <div class="ev-reward">🏆 Legendary Weapon + 200,000 Gold</div>
+      </div>
+      <div class="ev-card reveal">
+        <span class="ev-time">🔥 EVERY FRIDAY</span>
+        <h3>Guild War Siege</h3>
+        <p>Guilds fight for control of the Sacred Castle. The ruling guild earns buffs and taxes all week.</p>
+        <div class="ev-reward">🏆 Castle Ownership + Guild Buffs</div>
+      </div>
+      <div class="ev-card reveal">
+        <span class="ev-time">🟡 ONGOING</span>
+        <h3>Referral Bonus Event</h3>
+        <p>Invite friends and earn bonus tokens for every active referral. No limit on earnings.</p>
+        <div class="ev-reward">🏆 1,000 Tokens per Active Referral</div>
+      </div>
+    </div>
+  </div>
+</section>
+<div class="fire-sep" style="margin:0;"></div>
+
+<!-- DOWNLOAD -->
+<section class="download" id="download">
+  <div class="dl-glow"></div>
+  <div class="dl-inner">
+    <img src="/mnt/user-data/uploads/1771381898467_31cd4aba-a74d-4e8b-b43d-ee696a59b4f9.png" alt="BabyRan Inferno" class="dl-logo">
+    <h2>Begin Your Inferno Journey</h2>
+    <p>Thousands of warriors are already hunting, fighting, and earning. Join them — download free and pick your server.</p>
+    <div class="dl-btns">
+      <a href="#" class="dl-btn pc">🖥 Download for PC</a>
+      <a href="#" class="dl-btn apk">📱 Android APK</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">
+    <img src="/mnt/user-data/uploads/1771381898467_31cd4aba-a74d-4e8b-b43d-ee696a59b4f9.png" alt="BabyRan Inferno">
+  </div>
+  <div class="ft-links">
+    <a href="#">Home</a>
+    <a href="#">Register</a>
+    <a href="#">Servers</a>
+    <a href="#">Events</a>
+    <a href="#">P2E Shop</a>
+    <a href="#">Support</a>
+    <a href="#">Facebook</a>
+  </div>
+  <div class="socials">
+    <a class="soc" href="#" title="Facebook">f</a>
+    <a class="soc" href="#" title="Discord">💬</a>
+    <a class="soc" href="#" title="YouTube">▶</a>
+    <a class="soc" href="#" title="Telegram">✈</a>
+  </div>
+  <p>© 2025 BabyRan Inferno. All rights reserved.</p>
+  <p>Private Server — For Entertainment Purposes Only.</p>
+</footer>
+
+<script>
+// ═══════════════════════════════════════════════
+//  CUSTOM FIRE CURSOR
+// ═══════════════════════════════════════════════
+const cursorEl = document.getElementById('cursor');
+const trailCanvas = document.createElement('canvas');
+trailCanvas.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:9997;';
+document.body.appendChild(trailCanvas);
+const tctx = trailCanvas.getContext('2d');
+trailCanvas.width = window.innerWidth;
+trailCanvas.height = window.innerHeight;
+
+let mx = -100, my = -100;
+const trail = [];
+
+document.addEventListener('mousemove', e => {
+  mx = e.clientX; my = e.clientY;
+  cursorEl.style.left = mx + 'px';
+  cursorEl.style.top = my + 'px';
+  trail.push({ x: mx, y: my, life: 1, size: Math.random() * 5 + 3,
+    color: ['#FF6B00','#FF3D00','#FFB300','#FF8C00'][Math.floor(Math.random()*4)] });
+  if (trail.length > 40) trail.shift();
+});
+
+function animTrail() {
+  tctx.clearRect(0, 0, trailCanvas.width, trailCanvas.height);
+  for (let i = trail.length - 1; i >= 0; i--) {
+    const t = trail[i];
+    t.life -= 0.06;
+    t.y -= 0.5;
+    t.x += (Math.random() - 0.5) * 0.5;
+    if (t.life <= 0) { trail.splice(i, 1); continue; }
+    tctx.save();
+    tctx.globalAlpha = t.life * 0.7;
+    tctx.shadowBlur = 12;
+    tctx.shadowColor = t.color;
+    tctx.fillStyle = t.color;
+    tctx.beginPath();
+    tctx.arc(t.x, t.y, t.size * t.life, 0, Math.PI * 2);
+    tctx.fill();
+    tctx.restore();
+  }
+  requestAnimationFrame(animTrail);
+}
+animTrail();
+
+// ═══════════════════════════════════════════════
+//  FIRE EMBER CANVAS
+// ═══════════════════════════════════════════════
+const canvas = document.getElementById('fireCanvas');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+window.addEventListener('resize', () => {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  trailCanvas.width = window.innerWidth;
+  trailCanvas.height = window.innerHeight;
+  lcanvas.width = window.innerWidth;
+  lcanvas.height = window.innerHeight;
+});
+
+const FIRE_COLORS = ['rgba(255,80,0,','rgba(255,140,0,','rgba(255,200,0,','rgba(255,50,0,','rgba(255,60,20,'];
+
+class Ember {
+  constructor(type) {
+    this.type = type || 'float';
+    this.reset();
+  }
+  reset() {
+    if (this.type === 'bottom') {
+      this.x = Math.random() * canvas.width;
+      this.y = canvas.height + 10;
+    } else {
+      this.x = Math.random() * canvas.width;
+      this.y = Math.random() * canvas.height;
+    }
+    this.vx = (Math.random() - 0.5) * 1.2;
+    this.vy = -(Math.random() * 2 + 0.5);
+    this.size = Math.random() * 3 + 0.8;
+    this.life = Math.random() * 0.5 + 0.5;
+    this.maxLife = this.life;
+    this.decay = Math.random() * 0.004 + 0.001;
+    this.color = FIRE_COLORS[Math.floor(Math.random() * FIRE_COLORS.length)];
+    this.wobble = Math.random() * Math.PI * 2;
+  }
+  update() {
+    this.wobble += 0.04;
+    this.x += this.vx + Math.sin(this.wobble) * 0.3;
+    this.y += this.vy;
+    this.life -= this.decay;
+    if (this.life <= 0 || this.y < -20) this.reset();
+  }
+  draw() {
+    const alpha = (this.life / this.maxLife);
+    ctx.save();
+    ctx.globalAlpha = alpha * 0.65;
+    ctx.shadowBlur = 10;
+    ctx.shadowColor = this.color + '1)';
+    ctx.fillStyle = this.color + (alpha * 0.9) + ')';
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.size * alpha, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+}
+
+const particles = [];
+for (let i = 0; i < 80; i++) {
+  const e = new Ember('bottom');
+  e.y = Math.random() * canvas.height;
+  particles.push(e);
+}
+
+function animFire() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  particles.forEach(p => { p.update(); p.draw(); });
+  requestAnimationFrame(animFire);
+}
+animFire();
+
+// ═══════════════════════════════════════════════
+//  LIGHTNING STRIKES
+// ═══════════════════════════════════════════════
+const lcanvas = document.getElementById('lightning-canvas');
+const lctx = lcanvas.getContext('2d');
+lcanvas.width = window.innerWidth;
+lcanvas.height = window.innerHeight;
+
+function drawBolt(x1, y1, x2, y2, spread, depth) {
+  if (depth <= 0) return;
+  const mx = (x1 + x2) / 2 + (Math.random() - 0.5) * spread;
+  const my = (y1 + y2) / 2 + (Math.random() - 0.5) * spread;
+  lctx.beginPath();
+  lctx.moveTo(x1, y1);
+  lctx.lineTo(mx, my);
+  lctx.lineTo(x2, y2);
+  lctx.stroke();
+  if (Math.random() < 0.4) drawBolt(mx, my, mx + (Math.random()-0.5)*100, my + 80, spread/2, depth-1);
+  drawBolt(x1, y1, mx, my, spread/2, depth-1);
+  drawBolt(mx, my, x2, y2, spread/2, depth-1);
+}
+
+function triggerLightning() {
+  lctx.clearRect(0, 0, lcanvas.width, lcanvas.height);
+  const x = Math.random() * lcanvas.width;
+  lctx.strokeStyle = `rgba(255,${150+Math.random()*100},0,0.9)`;
+  lctx.lineWidth = 1.5;
+  lctx.shadowBlur = 20;
+  lctx.shadowColor = '#FF8C00';
+  drawBolt(x, 0, x + (Math.random()-0.5)*200, lcanvas.height * 0.6, 120, 4);
+  lcanvas.style.opacity = '1';
+  setTimeout(() => { lcanvas.style.opacity = '0'; lctx.clearRect(0,0,lcanvas.width,lcanvas.height); }, 120);
+  setTimeout(() => {
+    lctx.clearRect(0,0,lcanvas.width,lcanvas.height);
+    lctx.shadowBlur = 30;
+    drawBolt(x, 0, x + (Math.random()-0.5)*150, lcanvas.height * 0.5, 80, 3);
+    lcanvas.style.opacity = '0.7';
+    setTimeout(() => { lcanvas.style.opacity = '0'; lctx.clearRect(0,0,lcanvas.width,lcanvas.height); }, 80);
+  }, 200);
+  setTimeout(triggerLightning, 4000 + Math.random() * 8000);
+}
+setTimeout(triggerLightning, 3000);
+
+// ═══════════════════════════════════════════════
+//  FLOATING RUNES
+// ═══════════════════════════════════════════════
+const RUNES = ['⚔','🔥','☽','✦','◆','⚡','☠','🌀','⚜','✸'];
+for (let i = 0; i < 12; i++) {
+  const r = document.createElement('div');
+  r.className = 'rune';
+  r.textContent = RUNES[Math.floor(Math.random() * RUNES.length)];
+  r.style.left = Math.random() * 100 + 'vw';
+  r.style.animationDuration = (14 + Math.random() * 20) + 's';
+  r.style.animationDelay = (Math.random() * 15) + 's';
+  r.style.fontSize = (10 + Math.random() * 10) + 'px';
+  r.style.opacity = (0.1 + Math.random() * 0.2).toString();
+  document.body.appendChild(r);
+}
+
+// ═══════════════════════════════════════════════
+//  LAVA CRACK FLASHES ON HERO
+// ═══════════════════════════════════════════════
+const hero = document.querySelector('.hero');
+if (hero) {
+  const crackContainer = document.createElement('div');
+  crackContainer.className = 'lava-cracks';
+  hero.appendChild(crackContainer);
+  for (let i = 0; i < 6; i++) {
+    const c = document.createElement('div');
+    c.className = 'crack';
+    const w = 60 + Math.random() * 200;
+    const h = 1 + Math.random() * 2;
+    c.style.cssText = `
+      left:${Math.random()*80}%;
+      top:${Math.random()*100}%;
+      width:${w}px;
+      height:${h}px;
+      --angle:${Math.random()*60-30}deg;
+      --dur:${5+Math.random()*8}s;
+      --delay:${Math.random()*6}s;
+      transform:rotate(${Math.random()*40-20}deg);
+    `;
+    crackContainer.appendChild(c);
+  }
+}
+
+// ═══════════════════════════════════════════════
+//  SCROLL REVEAL
+// ═══════════════════════════════════════════════
+const revealEls = document.querySelectorAll('.reveal, .reveal-left, .reveal-right');
+const revealObs = new IntersectionObserver(entries => {
+  entries.forEach((en, idx) => {
+    if (en.isIntersecting) {
+      setTimeout(() => en.target.classList.add('visible'), 60);
+      revealObs.unobserve(en.target);
+    }
+  });
+}, { threshold: 0.12 });
+revealEls.forEach(el => revealObs.observe(el));
+
+// ═══════════════════════════════════════════════
+//  BUTTON CLICK PARTICLE BURST
+// ═══════════════════════════════════════════════
+document.querySelectorAll('.btn-fire, .srv-btn, .dl-btn, .nav-cta').forEach(btn => {
+  btn.addEventListener('click', e => {
+    for (let i = 0; i < 16; i++) {
+      const p = document.createElement('div');
+      p.className = 'burst-particle';
+      const angle = (i / 16) * Math.PI * 2;
+      const dist = 40 + Math.random() * 60;
+      p.style.cssText = `
+        left:${e.clientX}px;
+        top:${e.clientY}px;
+        background:${['#FF6B00','#FFB300','#FF3D00','#FFD700'][Math.floor(Math.random()*4)]};
+        --bx:${Math.cos(angle)*dist}px;
+        --by:${Math.sin(angle)*dist}px;
+        box-shadow:0 0 6px rgba(255,107,0,0.8);
+      `;
+      document.body.appendChild(p);
+      setTimeout(() => p.remove(), 800);
+    }
+  });
+});
+
+// ═══════════════════════════════════════════════
+//  MOUSE PARALLAX ON HERO LOGO
+// ═══════════════════════════════════════════════
+const heroLogo = document.querySelector('.hero-logo');
+document.addEventListener('mousemove', e => {
+  if (!heroLogo) return;
+  const rx = (e.clientX / window.innerWidth - 0.5) * 12;
+  const ry = (e.clientY / window.innerHeight - 0.5) * 8;
+  heroLogo.style.transform = `translateY(${Math.sin(Date.now()/1000)*8}px) rotateX(${-ry}deg) rotateY(${rx}deg)`;
+});
+
+// ═══════════════════════════════════════════════
+//  HOVER FLAME EFFECT ON CARDS
+// ═══════════════════════════════════════════════
+document.querySelectorAll('.p2e-card, .ev-card, .srv-card').forEach(card => {
+  card.addEventListener('mousemove', e => {
+    const rect = card.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    card.style.background = card.style.background || '';
+    card.style.setProperty('--mx', x + '%');
+    card.style.setProperty('--my', y + '%');
+  });
+});
+
+// ═══════════════════════════════════════════════
+//  SMOOTH SCROLL
+// ═══════════════════════════════════════════════
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    const t = document.querySelector(a.getAttribute('href'));
+    if (t) { e.preventDefault(); t.scrollIntoView({ behavior: 'smooth' }); }
+  });
+});
+
+// ═══════════════════════════════════════════════
+//  COUNT-UP ANIMATION
+// ═══════════════════════════════════════════════
+const countEls = document.querySelectorAll('[data-count]');
+const io = new IntersectionObserver(entries => {
+  entries.forEach(en => {
+    if (en.isIntersecting) {
+      const el = en.target;
+      const target = parseInt(el.dataset.count);
+      const dur = 1600;
+      const t0 = performance.now();
+      const tick = now => {
+        const prog = Math.min((now - t0) / dur, 1);
+        const ease = 1 - Math.pow(1 - prog, 3);
+        el.textContent = Math.floor(ease * target).toLocaleString() + '+';
+        if (prog < 1) requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+      io.unobserve(el);
+    }
+  });
+}, { threshold: 0.5 });
+countEls.forEach(el => io.observe(el));
+
+// ═══════════════════════════════════════════════
+//  NOTIFY BUTTON
+// ═══════════════════════════════════════════════
+const notifyBtn = document.querySelector('.notify-btn');
+if (notifyBtn) {
+  notifyBtn.addEventListener('click', () => {
+    const input = document.querySelector('.notify-input');
+    if (input && input.value.includes('@')) {
+      notifyBtn.textContent = '✔ Noted!';
+      notifyBtn.style.background = 'linear-gradient(135deg,#00C853,#00E676)';
+      input.value = '';
+      input.placeholder = 'You\'ll be the first to know! 🔥';
+    } else {
+      notifyBtn.textContent = 'Invalid!';
+      setTimeout(() => notifyBtn.textContent = 'Notify Me', 1500);
+    }
+  });
+}
+</script>
+</body>
+</html>
