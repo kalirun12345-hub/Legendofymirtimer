@@ -3,1899 +3,691 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BabyRan Inferno — Play to Earn</title>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+<title>BabyRan Inferno — Play to Earn MMORPG</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Cinzel+Decorative:wght@700;900&family=Inter:wght@300;400;500;600&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --fire1: #FF6B00;
-    --fire2: #FF3D00;
-    --fire3: #FFB300;
-    --fire4: #FF8C00;
-    --gold: #FFD700;
-    --gold2: #FFA500;
-    --ember: #FF4500;
-    --dark: #050505;
-    --dark2: #0D0000;
-    --dark3: #150800;
-    --dark4: #1A0A00;
-    --text: #F0E0D0;
-    --muted: #8A6A5A;
-    --teal: #00F5D4;
-  }
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+:root{
+  --bg:        #06040A;
+  --bg2:       #0B0810;
+  --bg3:       #100C14;
+  --gold:      #C8923A;
+  --gold2:     #E0AE60;
+  --gold3:     #F0D090;
+  --fire:      #D84E18;
+  --fire2:     #E87030;
+  --text:      #E8DDD0;
+  --muted:     #6A5F58;
+  --dim:       #3A302A;
+  --border:    rgba(200,146,58,0.14);
+  --border2:   rgba(200,146,58,0.28);
+  --tr:        0.32s cubic-bezier(0.4,0,0.2,1);
+}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;overflow-x:hidden;cursor:none;}
+::-webkit-scrollbar{width:3px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--gold);}
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  html { scroll-behavior: smooth; }
+/* ─── FIXED LAYERS ─── */
+#bg-canvas,#trail-canvas{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;}
+#bg-canvas{z-index:0;}
+#trail-canvas{z-index:9997;}
+.vignette{position:fixed;inset:0;z-index:1;pointer-events:none;
+  background:radial-gradient(ellipse 85% 85% at 50% 50%,transparent 38%,rgba(4,2,8,0.75) 100%);}
+#cdot{position:fixed;width:7px;height:7px;border-radius:50%;
+  background:var(--gold3);box-shadow:0 0 10px var(--gold2),0 0 22px rgba(200,146,58,0.3);
+  pointer-events:none;z-index:10000;transform:translate(-50%,-50%);
+  transition:width .18s,height .18s;}
+#cring{position:fixed;width:30px;height:30px;border:1px solid rgba(200,146,58,0.45);
+  border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);
+  transition:border-color .2s,transform .2s;}
 
-  body {
-    background: var(--dark);
-    color: var(--text);
-    font-family: 'Rajdhani', sans-serif;
-    overflow-x: hidden;
-  }
+/* Grain */
+body::after{content:'';position:fixed;inset:0;z-index:2;pointer-events:none;opacity:.028;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size:200px;}
 
-  ::-webkit-scrollbar { width: 5px; }
-  ::-webkit-scrollbar-track { background: var(--dark); }
-  ::-webkit-scrollbar-thumb { background: var(--fire1); }
+/* ════════ NAV ════════ */
+nav{position:fixed;top:0;left:0;right:0;z-index:500;height:66px;
+  display:flex;align-items:center;justify-content:space-between;padding:0 52px;
+  background:linear-gradient(180deg,rgba(6,4,10,.97) 0%,rgba(6,4,10,0) 100%);
+  backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+  border-bottom:1px solid var(--border);transition:background var(--tr);}
+nav.stuck{background:rgba(6,4,10,.97);border-bottom-color:var(--border2);
+  box-shadow:0 1px 36px rgba(0,0,0,.6);}
+nav::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--gold2) 30%,var(--gold3) 50%,var(--gold2) 70%,transparent);
+  opacity:.55;}
 
-  /* FIRE PARTICLES */
-  #fireCanvas {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    pointer-events: none;
-    z-index: 0;
-  }
+.brand{display:flex;align-items:center;gap:11px;text-decoration:none;}
+.brand-hex{width:36px;height:36px;border:1px solid var(--border2);
+  display:flex;align-items:center;justify-content:center;font-size:16px;
+  clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);
+  background:linear-gradient(135deg,rgba(200,146,58,.08),rgba(200,146,58,.02));
+  animation:hexPulse 3.5s ease-in-out infinite;}
+@keyframes hexPulse{0%,100%{box-shadow:0 0 14px rgba(200,146,58,.12);}50%{box-shadow:0 0 26px rgba(200,146,58,.3);}}
+.brand-text{display:flex;flex-direction:column;line-height:1.1;}
+.brand-name{font-family:'Cinzel Decorative',serif;font-size:14px;font-weight:700;letter-spacing:1px;
+  background:linear-gradient(135deg,var(--gold3),var(--gold2),var(--gold));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.brand-tag{font-family:'Orbitron',sans-serif;font-size:6.5px;letter-spacing:4px;color:var(--muted);text-transform:uppercase;}
 
-  /* EMBER BG PATTERN */
-  .ember-bg {
-    position: fixed;
-    inset: 0;
-    background:
-      radial-gradient(ellipse 100% 60% at 50% 0%, rgba(255,100,0,0.06) 0%, transparent 60%),
-      radial-gradient(ellipse 60% 40% at 0% 100%, rgba(255,60,0,0.04) 0%, transparent 50%),
-      radial-gradient(ellipse 60% 40% at 100% 100%, rgba(255,150,0,0.04) 0%, transparent 50%);
-    pointer-events: none;
-    z-index: 0;
-  }
+.nav-links{display:flex;align-items:center;gap:0;list-style:none;}
+.nav-links a{font-family:'Orbitron',sans-serif;font-size:8.5px;letter-spacing:2px;text-transform:uppercase;
+  color:var(--muted);text-decoration:none;padding:8px 18px;position:relative;transition:color var(--tr);}
+.nav-links a::after{content:'';position:absolute;bottom:3px;left:50%;right:50%;height:1px;
+  background:var(--gold2);box-shadow:0 0 5px var(--gold);transition:left .28s,right .28s;}
+.nav-links a:hover{color:var(--gold2);}
+.nav-links a:hover::after{left:18px;right:18px;}
 
-  /* NAV */
-  nav {
-    position: fixed;
-    top: 0; width: 100%;
-    padding: 0 48px;
-    height: 70px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    z-index: 100;
-    background: linear-gradient(to bottom, rgba(4,0,0,0.98) 0%, rgba(4,0,0,0.85) 100%);
-    border-bottom: 1px solid rgba(255,107,0,0.18);
-    box-shadow: 0 2px 40px rgba(255,60,0,0.08), 0 0 0 1px rgba(255,107,0,0.05);
-    backdrop-filter: blur(12px);
-  }
+.nav-btn{font-family:'Orbitron',sans-serif;font-size:8.5px;letter-spacing:2px;text-transform:uppercase;font-weight:700;
+  padding:10px 26px;background:linear-gradient(135deg,var(--fire),var(--gold));color:#050208;
+  border:none;cursor:pointer;text-decoration:none;
+  clip-path:polygon(8px 0%,100% 0%,calc(100% - 8px) 100%,0% 100%);
+  transition:all var(--tr);box-shadow:0 0 20px rgba(216,78,24,.32);position:relative;overflow:hidden;}
+.nav-btn::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.18),transparent);
+  opacity:0;transition:opacity var(--tr);}
+.nav-btn:hover{transform:translateY(-1px);box-shadow:0 4px 28px rgba(216,78,24,.55);}
+.nav-btn:hover::before{opacity:1;}
 
-  /* Animated fire line at top of nav */
-  nav::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 2px;
-    background: linear-gradient(90deg,
-      transparent 0%,
-      rgba(255,60,0,0.4) 10%,
-      var(--fire1) 30%,
-      var(--fire3) 50%,
-      var(--fire1) 70%,
-      rgba(255,60,0,0.4) 90%,
-      transparent 100%);
-    box-shadow: 0 0 12px rgba(255,107,0,0.6), 0 0 25px rgba(255,80,0,0.3);
-    animation: navFlame 3s ease-in-out infinite;
-  }
-  @keyframes navFlame {
-    0%, 100% { opacity: 0.8; }
-    50% { opacity: 1; box-shadow: 0 0 18px rgba(255,140,0,0.8), 0 0 35px rgba(255,80,0,0.4); }
-  }
+/* ════════ HERO ════════ */
+.hero{position:relative;z-index:3;min-height:100vh;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;padding:110px 24px 80px;overflow:hidden;}
+.hero-grid{position:absolute;inset:0;pointer-events:none;
+  background-image:linear-gradient(rgba(200,146,58,.03) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(200,146,58,.03) 1px,transparent 1px);
+  background-size:62px 62px;
+  mask-image:radial-gradient(ellipse 65% 65% at 50% 50%,black,transparent);}
+.hero-orb{position:absolute;width:560px;height:560px;border-radius:50%;
+  background:radial-gradient(circle,rgba(190,75,18,.11) 0%,rgba(180,55,10,.05) 40%,transparent 70%);
+  top:50%;left:50%;transform:translate(-50%,-58%);pointer-events:none;
+  animation:orbBreath 5s ease-in-out infinite;}
+@keyframes orbBreath{0%,100%{transform:translate(-50%,-58%) scale(1);opacity:.8;}
+  50%{transform:translate(-50%,-58%) scale(1.14);opacity:1;}}
 
-  /* Corner ornaments */
-  nav::after {
-    content: '';
-    position: absolute;
-    bottom: 0; left: 0; right: 0;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(255,60,0,0.15), transparent);
-  }
+.hero-logo{position:relative;z-index:2;width:min(520px,88vw);margin-bottom:10px;
+  filter:drop-shadow(0 0 36px rgba(190,90,18,.42)) drop-shadow(0 16px 56px rgba(0,0,0,.8));
+  animation:logoFloat 5s ease-in-out infinite;transform-style:preserve-3d;will-change:transform;}
+@keyframes logoFloat{0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}}
 
-  /* LOGO text mark */
-  .nav-logo {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    text-decoration: none;
-    position: relative;
-  }
-  .nav-logo-emblem {
-    width: 36px; height: 36px;
-    background: linear-gradient(135deg, var(--fire2), var(--fire3));
-    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 16px;
-    box-shadow: 0 0 14px rgba(255,100,0,0.6);
-    animation: emblemPulse 2.5s ease-in-out infinite;
-    flex-shrink: 0;
-  }
-  @keyframes emblemPulse {
-    0%, 100% { box-shadow: 0 0 12px rgba(255,100,0,0.5); }
-    50% { box-shadow: 0 0 22px rgba(255,140,0,0.9), 0 0 40px rgba(255,80,0,0.4); }
-  }
-  .nav-logo-text {
-    display: flex;
-    flex-direction: column;
-    line-height: 1;
-  }
-  .nav-logo-text .brand {
-    font-family: 'Cinzel Decorative', cursive;
-    font-size: 16px;
-    font-weight: 900;
-    background: linear-gradient(135deg, var(--fire3) 0%, var(--fire1) 50%, var(--gold) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    letter-spacing: 2px;
-    text-shadow: none;
-    background-size: 200% auto;
-    animation: shimmer 3s linear infinite;
-  }
-  .nav-logo-text .sub {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 7.5px;
-    letter-spacing: 5px;
-    color: rgba(255,140,0,0.6);
-    margin-top: 2px;
-    text-transform: uppercase;
-  }
+.hero-pill{position:relative;z-index:2;display:inline-flex;align-items:center;gap:8px;
+  font-family:'Orbitron',sans-serif;font-size:8px;letter-spacing:4px;text-transform:uppercase;
+  color:var(--gold2);border:1px solid rgba(200,146,58,.28);padding:7px 20px;
+  background:rgba(200,146,58,.04);clip-path:polygon(6px 0%,100% 0%,calc(100% - 6px) 100%,0% 100%);
+  margin-bottom:22px;animation:pillGlow 3.5s ease-in-out infinite;}
+@keyframes pillGlow{0%,100%{border-color:rgba(200,146,58,.28);}50%{border-color:rgba(200,146,58,.52);box-shadow:0 0 18px rgba(200,146,58,.1);}}
+.live-dot{width:5px;height:5px;border-radius:50%;background:#22FF88;box-shadow:0 0 8px #22FF88;
+  animation:blink 1.5s ease-in-out infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.3;}}
 
-  /* NAV LINKS */
-  nav ul {
-    list-style: none;
-    display: flex;
-    gap: 6px;
-    align-items: center;
-  }
-  nav ul li a {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 9.5px;
-    letter-spacing: 2px;
-    color: rgba(180,100,60,0.8);
-    text-decoration: none;
-    text-transform: uppercase;
-    padding: 8px 16px;
-    position: relative;
-    transition: color 0.3s;
-    display: block;
-  }
-  nav ul li a::before {
-    content: '';
-    position: absolute;
-    bottom: 4px; left: 50%; right: 50%;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, var(--fire3), transparent);
-    transition: left 0.3s, right 0.3s;
-  }
-  nav ul li a:hover { color: var(--fire3); }
-  nav ul li a:hover::before { left: 16px; right: 16px; box-shadow: 0 0 6px rgba(255,179,0,0.5); }
+.hero-sub{position:relative;z-index:2;font-size:clamp(14px,2vw,17px);font-weight:300;
+  color:var(--muted);max-width:500px;line-height:1.85;margin:0 auto 40px;letter-spacing:.2px;}
+.hero-sub strong{color:var(--gold2);font-weight:500;}
 
-  /* Separator dots */
-  nav ul li:not(:last-child)::after {
-    content: '◆';
-    color: rgba(255,80,0,0.2);
-    font-size: 6px;
-    margin-left: 0;
-  }
+.hero-btns{position:relative;z-index:2;display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-bottom:68px;}
+.btn-A,.btn-B{font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;text-transform:uppercase;
+  font-weight:700;text-decoration:none;padding:14px 36px;
+  clip-path:polygon(10px 0%,100% 0%,calc(100% - 10px) 100%,0% 100%);
+  transition:all var(--tr);position:relative;overflow:hidden;cursor:pointer;border:none;}
+.btn-A{background:linear-gradient(135deg,var(--fire),var(--gold));color:#050208;
+  box-shadow:0 0 28px rgba(216,78,24,.38),0 4px 18px rgba(0,0,0,.4);}
+.btn-A::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.18),transparent);opacity:0;transition:opacity var(--tr);}
+.btn-A:hover{transform:translateY(-2px);box-shadow:0 6px 40px rgba(216,78,24,.58);}
+.btn-A:hover::before{opacity:1;}
+.btn-B{background:transparent;color:var(--gold2);border:1px solid rgba(200,146,58,.38);}
+.btn-B:hover{background:rgba(200,146,58,.07);border-color:rgba(200,146,58,.6);
+  box-shadow:0 0 22px rgba(200,146,58,.14);transform:translateY(-2px);}
 
-  /* CTA BUTTON */
-  .nav-cta {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 9.5px;
-    letter-spacing: 2px;
-    padding: 0 24px;
-    height: 38px;
-    background: linear-gradient(135deg, var(--fire2) 0%, var(--fire1) 50%, var(--fire3) 100%);
-    background-size: 200% auto;
-    color: #060000;
-    font-weight: 900;
-    border: none;
-    cursor: pointer;
-    clip-path: polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%);
-    text-decoration: none;
-    text-transform: uppercase;
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    transition: transform 0.2s, box-shadow 0.3s, background-position 0.5s;
-    box-shadow: 0 0 18px rgba(255,80,0,0.45), inset 0 1px 0 rgba(255,220,100,0.3);
-    animation: ctaPulse 2.5s ease-in-out infinite;
-  }
-  @keyframes ctaPulse {
-    0%, 100% { box-shadow: 0 0 15px rgba(255,80,0,0.4), inset 0 1px 0 rgba(255,220,100,0.2); }
-    50% { box-shadow: 0 0 30px rgba(255,100,0,0.7), 0 0 50px rgba(255,80,0,0.3), inset 0 1px 0 rgba(255,220,100,0.4); }
-  }
-  .nav-cta:hover {
-    transform: scale(1.04) translateY(-1px);
-    background-position: right center;
-  }
-  .nav-cta .cta-icon { font-size: 12px; }
+.hero-stats{position:relative;z-index:2;display:flex;flex-wrap:wrap;justify-content:center;
+  border:1px solid var(--border);background:rgba(200,146,58,.02);backdrop-filter:blur(8px);}
+.st{padding:20px 42px;text-align:center;position:relative;}
+.st:not(:last-child)::after{content:'';position:absolute;right:0;top:25%;bottom:25%;width:1px;background:var(--border);}
+.sn{font-family:'Orbitron',sans-serif;font-size:21px;font-weight:900;color:var(--gold2);
+  display:block;margin-bottom:4px;text-shadow:0 0 18px rgba(200,146,58,.38);}
+.sl{font-family:'Orbitron',sans-serif;font-size:7.5px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;}
 
-  /* HERO */
-  .hero {
-    position: relative;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 120px 20px 80px;
-    z-index: 1;
-    overflow: hidden;
-  }
+/* ════════ SHARED SECTION ════════ */
+section{position:relative;z-index:3;}
+.inner{max-width:1100px;margin:0 auto;padding:0 32px;}
+.sec-label{font-family:'Orbitron',sans-serif;font-size:8.5px;letter-spacing:4px;text-transform:uppercase;
+  color:var(--fire2);display:block;margin-bottom:8px;}
+.sec-title{font-family:'Cinzel',serif;font-size:clamp(22px,3.2vw,38px);font-weight:700;
+  color:var(--text);line-height:1.15;margin-bottom:14px;}
+.sec-title em{background:linear-gradient(135deg,var(--gold3),var(--gold));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;font-style:normal;}
+.sec-desc{font-size:14px;color:var(--muted);line-height:1.8;max-width:440px;}
+.tline{width:44px;height:1px;background:linear-gradient(90deg,var(--gold),transparent);
+  margin-top:18px;box-shadow:0 0 7px rgba(200,146,58,.4);}
+.hr-orn{width:100%;height:1px;position:relative;
+  background:linear-gradient(90deg,transparent,rgba(200,146,58,.1),rgba(200,146,58,.35),rgba(200,146,58,.1),transparent);}
+.hr-orn::before{content:'◆';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  color:var(--gold);font-size:9px;background:var(--bg);padding:0 12px;opacity:.5;}
 
-  .hero-grid {
-    position: absolute;
-    inset: 0;
-    background-image:
-      linear-gradient(rgba(255,107,0,0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255,107,0,0.03) 1px, transparent 1px);
-    background-size: 50px 50px;
-    mask-image: radial-gradient(ellipse at center, black 20%, transparent 70%);
-  }
+/* ════════ SERVERS ════════ */
+.srv-sec{padding:118px 0;background:linear-gradient(180deg,var(--bg) 0%,var(--bg2) 50%,var(--bg) 100%);}
+.srv-grid{display:grid;grid-template-columns:1.25fr 0.75fr;gap:1px;background:var(--border);
+  border:1px solid var(--border);margin-top:52px;}
 
-  /* LOGO IN HERO */
-  .hero-logo {
-    width: min(560px, 90vw);
-    margin-bottom: 8px;
-    position: relative;
-    z-index: 2;
-    filter: drop-shadow(0 0 30px rgba(255,100,0,0.5)) drop-shadow(0 0 60px rgba(255,60,0,0.3));
-    animation: logoFloat 4s ease-in-out infinite;
-  }
-  @keyframes logoFloat {
-    0%, 100% { transform: translateY(0px); filter: drop-shadow(0 0 30px rgba(255,100,0,0.5)) drop-shadow(0 0 60px rgba(255,60,0,0.3)); }
-    50% { transform: translateY(-8px); filter: drop-shadow(0 0 40px rgba(255,120,0,0.7)) drop-shadow(0 0 80px rgba(255,80,0,0.4)); }
-  }
+.asia1{background:var(--bg2);padding:46px 42px;position:relative;overflow:hidden;transition:background var(--tr);}
+.asia1:hover{background:var(--bg3);}
+.asia1::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--gold2),var(--gold3),var(--gold2),transparent);
+  box-shadow:0 0 10px rgba(200,146,58,.45);}
+.asia1::after{content:'';position:absolute;top:-90px;right:-90px;width:280px;height:280px;border-radius:50%;
+  background:radial-gradient(circle,rgba(200,80,20,.06) 0%,transparent 70%);pointer-events:none;}
 
-  .p2e-badge {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 10px;
-    letter-spacing: 4px;
-    color: var(--fire3);
-    border: 1px solid rgba(255,179,0,0.4);
-    padding: 7px 22px;
-    clip-path: polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%);
-    background: rgba(255,120,0,0.07);
-    margin-bottom: 20px;
-    display: inline-block;
-    animation: flameBadge 2s ease-in-out infinite;
-    position: relative;
-    z-index: 2;
-  }
-  @keyframes flameBadge {
-    0%, 100% { box-shadow: 0 0 10px rgba(255,179,0,0.3), inset 0 0 10px rgba(255,100,0,0.05); }
-    50% { box-shadow: 0 0 25px rgba(255,100,0,0.6), inset 0 0 20px rgba(255,80,0,0.1); }
-  }
+.live-tag{display:inline-flex;align-items:center;gap:7px;font-family:'Orbitron',sans-serif;
+  font-size:7.5px;letter-spacing:3px;text-transform:uppercase;color:#22FF88;
+  border:1px solid rgba(34,255,136,.2);padding:5px 13px;background:rgba(34,255,136,.04);
+  clip-path:polygon(5px 0%,100% 0%,calc(100% - 5px) 100%,0% 100%);margin-bottom:18px;}
+.card-t{font-family:'Cinzel',serif;font-size:28px;font-weight:700;color:var(--text);
+  margin-bottom:10px;letter-spacing:.5px;}
+.card-d{font-size:13.5px;color:var(--muted);line-height:1.8;margin-bottom:26px;}
+.card-d strong{color:var(--gold2);font-weight:500;}
 
-  .hero-tagline {
-    font-family: 'Rajdhani', sans-serif;
-    font-size: clamp(15px, 2.5vw, 20px);
-    color: var(--muted);
-    max-width: 580px;
-    line-height: 1.7;
-    margin: 0 auto 36px;
-    font-weight: 500;
-    position: relative;
-    z-index: 2;
-  }
-  .hero-tagline strong { color: var(--fire3); }
+.dual{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);
+  border:1px solid var(--border);margin-bottom:26px;}
+.mode{background:var(--bg);padding:18px 20px;transition:background var(--tr);}
+.mode:hover{background:rgba(200,146,58,.04);}
+.mode-ico{font-size:20px;margin-bottom:9px;display:block;}
+.mode-n{font-family:'Cinzel',serif;font-size:12px;font-weight:600;color:var(--gold2);margin-bottom:5px;}
+.mode-d{font-size:11.5px;color:var(--muted);line-height:1.6;}
 
-  .hero-btns {
-    display: flex;
-    gap: 16px;
-    justify-content: center;
-    flex-wrap: wrap;
-    margin-bottom: 70px;
-    position: relative;
-    z-index: 2;
-  }
+.fl{list-style:none;margin-bottom:30px;}
+.fl li{display:flex;align-items:center;gap:11px;padding:9px 0;font-size:13.5px;color:var(--text);
+  border-bottom:1px solid rgba(200,146,58,.06);transition:color var(--tr);}
+.fl li:last-child{border-bottom:none;}
+.fl li:hover{color:var(--gold2);}
+.fl li::before{content:'';width:3px;height:3px;border-radius:50%;background:var(--gold);
+  flex-shrink:0;box-shadow:0 0 5px var(--gold);}
 
-  .btn-fire {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 12px;
-    letter-spacing: 2px;
-    padding: 17px 44px;
-    background: linear-gradient(135deg, var(--fire2), var(--fire1), var(--fire3));
-    color: #080000;
-    font-weight: 900;
-    border: none;
-    cursor: pointer;
-    clip-path: polygon(14px 0%, 100% 0%, calc(100% - 14px) 100%, 0% 100%);
-    text-decoration: none;
-    display: inline-block;
-    transition: transform 0.2s, box-shadow 0.3s;
-    text-transform: uppercase;
-    animation: fireBtnPulse 2.5s ease-in-out infinite;
-  }
-  @keyframes fireBtnPulse {
-    0%, 100% { box-shadow: 0 0 20px rgba(255,80,0,0.5), 0 4px 20px rgba(255,60,0,0.3); }
-    50% { box-shadow: 0 0 40px rgba(255,100,0,0.8), 0 6px 30px rgba(255,80,0,0.5); }
-  }
-  .btn-fire:hover { transform: scale(1.06) translateY(-2px); }
+.online-r{display:flex;align-items:center;gap:7px;margin-bottom:26px;
+  font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:1px;color:#22FF88;}
+.gold-btn{font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;text-transform:uppercase;
+  font-weight:700;text-decoration:none;padding:13px 38px;
+  background:linear-gradient(135deg,var(--fire),var(--gold));color:#050208;
+  clip-path:polygon(9px 0%,100% 0%,calc(100% - 9px) 100%,0% 100%);
+  display:inline-block;border:none;cursor:pointer;transition:all var(--tr);
+  box-shadow:0 0 22px rgba(216,78,24,.32);position:relative;overflow:hidden;}
+.gold-btn::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.16),transparent);
+  opacity:0;transition:opacity var(--tr);}
+.gold-btn:hover{transform:translateY(-2px);box-shadow:0 5px 34px rgba(216,78,24,.52);}
+.gold-btn:hover::before{opacity:1;}
 
-  .btn-outline {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 12px;
-    letter-spacing: 2px;
-    padding: 15px 42px;
-    background: transparent;
-    color: var(--fire4);
-    font-weight: 700;
-    border: 1px solid rgba(255,140,0,0.5);
-    cursor: pointer;
-    clip-path: polygon(14px 0%, 100% 0%, calc(100% - 14px) 100%, 0% 100%);
-    text-decoration: none;
-    display: inline-block;
-    transition: all 0.3s;
-    text-transform: uppercase;
-  }
-  .btn-outline:hover {
-    background: rgba(255,107,0,0.1);
-    box-shadow: 0 0 25px rgba(255,107,0,0.4);
-    transform: scale(1.05);
-  }
+.asia2{background:var(--bg2);position:relative;overflow:hidden;
+  display:flex;align-items:center;justify-content:center;padding:46px 36px;min-height:440px;}
+.asia2::before{content:'';position:absolute;inset:0;
+  background-image:repeating-linear-gradient(-45deg,rgba(200,146,58,.022) 0,rgba(200,146,58,.022) 1px,transparent 1px,transparent 16px);}
+.cs-inner{position:relative;z-index:1;text-align:center;width:100%;}
+.cs-hex{width:52px;height:52px;border:1px solid rgba(200,146,58,.18);
+  display:flex;align-items:center;justify-content:center;font-size:20px;
+  clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);
+  background:rgba(200,146,58,.03);margin:0 auto 18px;
+  animation:hexPulse 4s ease-in-out infinite;}
+.cs-tag{font-family:'Orbitron',sans-serif;font-size:7.5px;letter-spacing:4px;text-transform:uppercase;
+  color:var(--muted);margin-bottom:10px;display:block;}
+.cs-title{font-family:'Cinzel',serif;font-size:26px;font-weight:700;
+  color:rgba(200,146,58,.28);letter-spacing:2px;margin-bottom:12px;}
+.cs-desc{font-size:12.5px;color:rgba(106,95,88,.75);line-height:1.8;margin-bottom:22px;}
+.cs-feats{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:24px;}
+.cs-f{font-family:'Orbitron',sans-serif;font-size:7px;letter-spacing:1px;text-transform:uppercase;
+  color:rgba(200,146,58,.32);border:1px solid rgba(200,146,58,.08);padding:9px 7px;text-align:center;
+  background:rgba(200,146,58,.02);}
+.cs-form{display:flex;}
+.cs-inp{flex:1;background:rgba(200,146,58,.04);border:1px solid rgba(200,146,58,.14);border-right:none;
+  color:var(--text);font-family:'Inter',sans-serif;font-size:12px;padding:10px 13px;
+  outline:none;transition:border-color var(--tr);}
+.cs-inp::placeholder{color:var(--muted);}
+.cs-inp:focus{border-color:rgba(200,146,58,.38);}
+.cs-sbm{font-family:'Orbitron',sans-serif;font-size:7.5px;letter-spacing:1px;text-transform:uppercase;
+  font-weight:700;padding:10px 15px;white-space:nowrap;
+  background:linear-gradient(135deg,var(--fire),var(--gold));color:#050208;border:none;cursor:pointer;
+  transition:all var(--tr);}
+.cs-sbm:hover{box-shadow:0 0 14px rgba(216,78,24,.4);}
+.cs-note{font-family:'Orbitron',sans-serif;font-size:7px;letter-spacing:1px;
+  color:rgba(106,95,88,.45);margin-top:10px;display:block;}
 
-  /* STATS */
-  .stats-row {
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    position: relative;
-    z-index: 2;
-    gap: 0;
-    border: 1px solid rgba(255,107,0,0.15);
-    background: rgba(255,60,0,0.03);
-    max-width: 800px;
-    margin: 0 auto;
-  }
-  .stat {
-    padding: 22px 44px;
-    text-align: center;
-    position: relative;
-  }
-  .stat:not(:last-child)::after {
-    content: '';
-    position: absolute;
-    right: 0; top: 20%; bottom: 20%;
-    width: 1px;
-    background: rgba(255,107,0,0.2);
-  }
-  .stat-n {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 26px;
-    font-weight: 900;
-    color: var(--fire3);
-    display: block;
-    text-shadow: 0 0 15px rgba(255,179,0,0.5);
-  }
-  .stat-l {
-    font-size: 10px;
-    letter-spacing: 2px;
-    color: var(--muted);
-    text-transform: uppercase;
-    font-family: 'Orbitron', sans-serif;
-    margin-top: 4px;
-    display: block;
-  }
+/* ════════ P2E ════════ */
+.p2e-sec{padding:118px 0;background:var(--bg);}
+.p2e-head{display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:24px;margin-bottom:52px;}
+.p2e-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border:1px solid var(--border);}
+.pc{background:var(--bg);padding:34px 28px;position:relative;overflow:hidden;transition:background var(--tr);cursor:default;}
+.pc:hover{background:var(--bg2);}
+.pc::before{content:'';position:absolute;top:0;left:0;width:1px;height:0;
+  background:var(--gold);transition:height var(--tr);box-shadow:0 0 7px rgba(200,146,58,.5);}
+.pc:hover::before{height:100%;}
+.pc::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);
+  opacity:0;transform:scaleX(0);transition:opacity var(--tr),transform var(--tr);}
+.pc:hover::after{opacity:1;transform:scaleX(1);}
+.pc-ico{width:42px;height:42px;display:flex;align-items:center;justify-content:center;font-size:18px;
+  border:1px solid var(--border);background:rgba(200,146,58,.03);margin-bottom:16px;transition:all var(--tr);}
+.pc:hover .pc-ico{border-color:var(--border2);background:rgba(200,146,58,.07);box-shadow:0 0 14px rgba(200,146,58,.12);}
+.pc h3{font-family:'Cinzel',serif;font-size:13.5px;font-weight:600;color:var(--text);margin-bottom:8px;}
+.pc p{font-size:12.5px;color:var(--muted);line-height:1.7;}
 
-  /* SECTION SHARED */
-  .sec {
-    position: relative;
-    z-index: 1;
-    padding: 100px 40px;
-  }
-  .sec-inner { max-width: 1160px; margin: 0 auto; }
-  .sec-head { text-align: center; margin-bottom: 56px; }
-  .sec-tag {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 9px;
-    letter-spacing: 4px;
-    color: var(--fire1);
-    text-transform: uppercase;
-    display: block;
-    margin-bottom: 12px;
-  }
-  .sec-title {
-    font-family: 'Cinzel Decorative', cursive;
-    font-size: clamp(22px, 3.5vw, 38px);
-    background: linear-gradient(135deg, var(--fire3), var(--fire1), var(--gold));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-size: 200% auto;
-    animation: shimmer 4s linear infinite;
-    margin-bottom: 14px;
-  }
-  @keyframes shimmer {
-    0% { background-position: 0% center; }
-    100% { background-position: 200% center; }
-  }
-  .sec-sub {
-    color: var(--muted);
-    max-width: 500px;
-    margin: 0 auto;
-    font-size: 15px;
-    line-height: 1.7;
-  }
-  .flame-divider {
-    width: 100px;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, var(--fire1), var(--fire3), var(--fire1), transparent);
-    margin: 18px auto 0;
-    box-shadow: 0 0 8px rgba(255,107,0,0.4);
-  }
+/* ════════ HOW TO ════════ */
+.how-sec{padding:118px 0;background:var(--bg2);}
+.how-inner{max-width:700px;margin:0 auto;padding:0 32px;}
+.steps{margin-top:52px;position:relative;}
+.steps::before{content:'';position:absolute;left:19px;top:0;bottom:0;width:1px;
+  background:linear-gradient(180deg,var(--gold),rgba(200,146,58,.08));}
+.step{display:flex;gap:26px;padding:22px 0;}
+.step-n{width:38px;height:38px;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;color:var(--bg);
+  background:linear-gradient(135deg,var(--fire),var(--gold));
+  clip-path:polygon(6px 0%,100% 0%,calc(100% - 6px) 100%,0% 100%);z-index:1;}
+.step-b h3{font-family:'Cinzel',serif;font-size:13.5px;font-weight:600;
+  color:var(--gold2);margin-bottom:5px;padding-top:9px;}
+.step-b p{font-size:13.5px;color:var(--muted);line-height:1.75;}
 
-  /* SERVER SECTION */
-  .servers { background: linear-gradient(180deg, var(--dark) 0%, var(--dark3) 50%, var(--dark) 100%); }
+/* ════════ EVENTS ════════ */
+.ev-sec{padding:118px 0;background:var(--bg);}
+.ev-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;
+  background:var(--border);border:1px solid var(--border);margin-top:52px;}
+.ec{background:var(--bg);padding:28px 26px;position:relative;overflow:hidden;transition:background var(--tr);}
+.ec:hover{background:var(--bg2);}
+.ec::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;
+  background:linear-gradient(180deg,var(--fire),var(--gold),transparent);opacity:0;transition:opacity var(--tr);}
+.ec:hover::before{opacity:1;}
+.ev-time{font-family:'Orbitron',sans-serif;font-size:7.5px;letter-spacing:2px;text-transform:uppercase;
+  color:var(--fire2);margin-bottom:9px;display:block;}
+.ev-t{font-family:'Cinzel',serif;font-size:15px;font-weight:600;color:var(--text);margin-bottom:7px;}
+.ev-d{font-size:12.5px;color:var(--muted);line-height:1.7;margin-bottom:12px;}
+.ev-rew{font-family:'Orbitron',sans-serif;font-size:8.5px;letter-spacing:.5px;color:var(--gold2);
+  padding-top:12px;border-top:1px solid var(--border);}
 
-  .srv-grid {
-    display: grid;
-    grid-template-columns: 1.15fr 0.85fr;
-    gap: 16px;
-    max-width: 1100px;
-    margin: 0 auto;
-    align-items: start;
-  }
+/* ════════ DOWNLOAD ════════ */
+.dl-sec{padding:130px 0;position:relative;overflow:hidden;background:var(--bg2);text-align:center;}
+.dl-sec::before{content:'';position:absolute;inset:0;pointer-events:none;
+  background-image:linear-gradient(rgba(200,146,58,.022) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(200,146,58,.022) 1px,transparent 1px);
+  background-size:58px 58px;}
+.dl-glow{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:750px;height:380px;pointer-events:none;
+  background:radial-gradient(ellipse,rgba(190,72,18,.07) 0%,transparent 70%);
+  animation:orbBreath 6s ease-in-out infinite;}
+.dl-logo{width:min(360px,72vw);filter:drop-shadow(0 0 28px rgba(190,88,18,.48)) drop-shadow(0 18px 48px rgba(0,0,0,.7));
+  margin-bottom:26px;position:relative;z-index:1;animation:logoFloat 5s ease-in-out infinite;}
+.dl-title{font-family:'Cinzel',serif;font-size:clamp(20px,3.2vw,40px);font-weight:700;
+  color:var(--text);margin-bottom:12px;position:relative;z-index:1;}
+.dl-title em{background:linear-gradient(135deg,var(--gold3),var(--gold));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;font-style:normal;}
+.dl-desc{font-size:14.5px;color:var(--muted);max-width:460px;margin:0 auto 42px;
+  line-height:1.8;position:relative;z-index:1;}
+.dl-row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;position:relative;z-index:1;}
+.dl-a,.dl-b{font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;text-transform:uppercase;
+  font-weight:700;padding:13px 34px;clip-path:polygon(9px 0%,100% 0%,calc(100% - 9px) 100%,0% 100%);
+  text-decoration:none;display:inline-flex;align-items:center;gap:9px;transition:all var(--tr);border:none;cursor:pointer;}
+.dl-a{background:linear-gradient(135deg,var(--fire),var(--gold));color:#050208;
+  box-shadow:0 0 22px rgba(216,78,24,.32);}
+.dl-a:hover{transform:translateY(-2px);box-shadow:0 5px 38px rgba(216,78,24,.52);}
+.dl-b{background:transparent;color:var(--gold2);border:1px solid rgba(200,146,58,.34);}
+.dl-b:hover{background:rgba(200,146,58,.07);border-color:rgba(200,146,58,.58);
+  box-shadow:0 0 18px rgba(200,146,58,.13);transform:translateY(-2px);}
 
-  /* ── ASIA 1 ── */
-  .srv-card {
-    position: relative;
-    overflow: hidden;
-    transition: transform 0.3s;
-  }
-  .srv-card.asia1 {
-    padding: 44px 40px;
-    background: linear-gradient(145deg, rgba(255,60,0,0.1), rgba(255,140,0,0.05), rgba(5,0,0,0.97));
-    border: 1px solid rgba(255,100,0,0.3);
-  }
-  .srv-card.asia1:hover { transform: translateY(-4px); }
-  .srv-card.asia1::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, var(--fire2), var(--fire3), var(--fire1), transparent);
-    box-shadow: 0 0 14px rgba(255,107,0,0.6);
-  }
+/* ════════ FOOTER ════════ */
+footer{background:var(--bg);border-top:1px solid var(--border);padding:48px 0 30px;text-align:center;position:relative;z-index:3;}
+.ft-inner{max-width:860px;margin:0 auto;padding:0 32px;}
+.ft-brand{font-family:'Cinzel Decorative',serif;font-size:17px;font-weight:700;letter-spacing:1px;
+  background:linear-gradient(135deg,var(--gold3),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  margin-bottom:22px;display:block;}
+.ft-links{display:flex;gap:0;justify-content:center;flex-wrap:wrap;margin-bottom:24px;list-style:none;}
+.ft-links a{font-family:'Orbitron',sans-serif;font-size:7.5px;letter-spacing:2px;text-transform:uppercase;
+  color:var(--muted);text-decoration:none;padding:8px 16px;border-right:1px solid var(--border);transition:color var(--tr);}
+.ft-links li:last-child a{border-right:none;}
+.ft-links a:hover{color:var(--gold2);}
+.ft-socials{display:flex;gap:8px;justify-content:center;margin-bottom:24px;}
+.soc{width:36px;height:36px;display:flex;align-items:center;justify-content:center;
+  border:1px solid var(--border);color:var(--muted);text-decoration:none;font-size:13px;
+  clip-path:polygon(5px 0%,100% 0%,calc(100% - 5px) 100%,0% 100%);transition:all var(--tr);}
+.soc:hover{background:rgba(200,146,58,.07);color:var(--gold2);border-color:var(--border2);box-shadow:0 0 12px rgba(200,146,58,.12);}
+.ft-copy{font-size:10.5px;color:var(--dim);line-height:1.9;}
 
-  .asia1-top {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 18px;
-    flex-wrap: wrap;
-    gap: 10px;
-  }
-  .server-region-badge {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: rgba(0,230,118,0.08);
-    border: 1px solid rgba(0,230,118,0.2);
-    padding: 6px 14px;
-    clip-path: polygon(5px 0%, 100% 0%, calc(100% - 5px) 100%, 0% 100%);
-  }
+/* ════════ REVEAL ════════ */
+.rev,.rev-l,.rev-r{opacity:0;will-change:transform,opacity;
+  transition:opacity .82s cubic-bezier(.4,0,.2,1),transform .82s cubic-bezier(.4,0,.2,1);}
+.rev{transform:translateY(28px);}.rev-l{transform:translateX(-36px);}.rev-r{transform:translateX(36px);}
+.rev.in,.rev-l.in,.rev-r.in{opacity:1;transform:none;}
+.d1{transition-delay:.05s;}.d2{transition-delay:.12s;}.d3{transition-delay:.19s;}
+.d4{transition-delay:.26s;}.d5{transition-delay:.33s;}.d6{transition-delay:.4s;}
 
-  /* Dual mode cards inside ASIA 1 */
-  .dual-modes {
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-    margin: 22px 0 26px;
-    border: 1px solid rgba(255,107,0,0.15);
-  }
-  .mode-card {
-    display: flex;
-    gap: 16px;
-    align-items: flex-start;
-    padding: 16px 18px;
-    background: rgba(255,60,0,0.04);
-    transition: background 0.3s;
-  }
-  .mode-card:hover { background: rgba(255,60,0,0.08); }
-  .mode-card:not(:last-child) { border-bottom: 1px solid rgba(255,107,0,0.12); }
-  .mode-icon { font-size: 26px; flex-shrink: 0; margin-top: 2px; }
-  .mode-title {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 11px;
-    letter-spacing: 2px;
-    color: var(--fire3);
-    text-transform: uppercase;
-    margin-bottom: 5px;
-  }
-  .mode-desc { color: var(--muted); font-size: 13px; line-height: 1.6; }
-  .mode-divider {
-    text-align: center;
-    font-family: 'Orbitron', sans-serif;
-    font-size: 13px;
-    color: rgba(255,107,0,0.4);
-    padding: 6px;
-    background: rgba(255,60,0,0.03);
-    border-bottom: 1px solid rgba(255,107,0,0.12);
-    letter-spacing: 4px;
-  }
+/* BURST */
+.burst{position:fixed;width:5px;height:5px;border-radius:50%;pointer-events:none;z-index:9998;
+  animation:burstA .7s ease-out forwards;}
+@keyframes burstA{0%{transform:translate(0,0) scale(1);opacity:1;}100%{transform:translate(var(--dx),var(--dy)) scale(0);opacity:0;}}
 
-  /* ── ASIA 2 COMING SOON ── */
-  .srv-card.asia2 {
-    min-height: 520px;
-    border: 1px solid rgba(255,107,0,0.12);
-    background: rgba(5,0,0,0.9);
-  }
-  .soon-overlay {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 36px 32px;
-    background:
-      linear-gradient(145deg, rgba(20,5,0,0.97), rgba(10,2,0,0.99)),
-      repeating-linear-gradient(
-        45deg,
-        rgba(255,60,0,0.02) 0px,
-        rgba(255,60,0,0.02) 2px,
-        transparent 2px,
-        transparent 12px
-      );
-  }
-  .soon-content { text-align: center; width: 100%; }
-  .soon-badge {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 9px;
-    letter-spacing: 3px;
-    color: rgba(180,80,0,0.7);
-    border: 1px solid rgba(255,107,0,0.18);
-    padding: 7px 18px;
-    clip-path: polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%);
-    background: rgba(255,60,0,0.04);
-    display: inline-block;
-    margin-bottom: 20px;
-    animation: lockedPulse 3s ease-in-out infinite;
-  }
-  @keyframes lockedPulse {
-    0%, 100% { border-color: rgba(255,107,0,0.18); color: rgba(180,80,0,0.7); }
-    50% { border-color: rgba(255,107,0,0.4); color: rgba(255,140,0,0.9); box-shadow: 0 0 14px rgba(255,80,0,0.15); }
-  }
-  .soon-title {
-    font-family: 'Cinzel Decorative', cursive;
-    font-size: 28px;
-    color: rgba(200,100,50,0.5);
-    margin-bottom: 14px;
-    letter-spacing: 2px;
-  }
-  .soon-desc {
-    color: rgba(120,70,50,0.8);
-    font-size: 14px;
-    line-height: 1.7;
-    margin-bottom: 24px;
-    max-width: 280px;
-    margin-left: auto;
-    margin-right: auto;
-  }
-  .soon-features {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-    margin-bottom: 28px;
-  }
-  .soon-feat {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 8px;
-    letter-spacing: 1px;
-    color: rgba(180,80,0,0.6);
-    border: 1px solid rgba(255,60,0,0.1);
-    padding: 9px 8px;
-    text-align: center;
-    background: rgba(255,40,0,0.03);
-    text-transform: uppercase;
-  }
-  .notify-box {
-    display: flex;
-    gap: 0;
-    margin-bottom: 12px;
-  }
-  .notify-input {
-    flex: 1;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,107,0,0.2);
-    border-right: none;
-    color: var(--text);
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 13px;
-    padding: 11px 14px;
-    outline: none;
-    transition: border-color 0.3s;
-  }
-  .notify-input::placeholder { color: rgba(140,80,50,0.5); }
-  .notify-input:focus { border-color: rgba(255,107,0,0.5); }
-  .notify-btn {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 9px;
-    letter-spacing: 1px;
-    padding: 11px 18px;
-    background: linear-gradient(135deg, var(--fire2), var(--fire1));
-    color: #060000;
-    font-weight: 900;
-    border: none;
-    cursor: pointer;
-    text-transform: uppercase;
-    transition: box-shadow 0.3s;
-    white-space: nowrap;
-  }
-  .notify-btn:hover { box-shadow: 0 0 18px rgba(255,80,0,0.5); }
-  .soon-note {
-    font-size: 11px;
-    color: rgba(120,70,50,0.6);
-    font-family: 'Orbitron', sans-serif;
-    letter-spacing: 1px;
-  }
-
-  .srv-icon { font-size: 44px; margin-bottom: 18px; display: block; }
-  .srv-badge {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 8px;
-    letter-spacing: 3px;
-    padding: 5px 16px;
-    clip-path: polygon(5px 0%, 100% 0%, calc(100% - 5px) 100%, 0% 100%);
-    display: inline-block;
-    margin-bottom: 16px;
-    background: rgba(255,107,0,0.12);
-    color: var(--fire3);
-    border: 1px solid rgba(255,107,0,0.3);
-    text-transform: uppercase;
-  }
-  .srv-name {
-    font-family: 'Cinzel Decorative', cursive;
-    font-size: 24px;
-    margin-bottom: 12px;
-    color: var(--fire3);
-    text-shadow: 0 0 20px rgba(255,140,0,0.3);
-  }
-  .srv-desc {
-    color: var(--muted);
-    font-size: 15px;
-    line-height: 1.7;
-    margin-bottom: 26px;
-  }
-  .feat-list {
-    list-style: none;
-    margin-bottom: 30px;
-  }
-  .feat-list li {
-    padding: 9px 0;
-    font-size: 15px;
-    color: var(--text);
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    border-bottom: 1px solid rgba(255,107,0,0.07);
-  }
-  .feat-list li:last-child { border-bottom: none; }
-  .feat-list li::before { content: '🔥'; font-size: 13px; }
-
-  .online-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 24px;
-  }
-  .odot {
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    background: #00E676;
-    box-shadow: 0 0 8px #00E676;
-    animation: blink 1.5s ease-in-out infinite;
-    flex-shrink: 0;
-  }
-  @keyframes blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.3; }
-  }
-  .online-txt {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 10px;
-    letter-spacing: 1px;
-    color: #00E676;
-  }
-
-  .srv-btn {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 10px;
-    letter-spacing: 2px;
-    padding: 14px 32px;
-    font-weight: 900;
-    border: none;
-    cursor: pointer;
-    clip-path: polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%);
-    text-decoration: none;
-    display: inline-block;
-    transition: all 0.3s;
-    text-transform: uppercase;
-    background: linear-gradient(135deg, var(--fire2), var(--fire1), var(--fire3));
-    color: #080000;
-  }
-  .srv-btn:hover { box-shadow: 0 0 30px rgba(255,100,0,0.6); transform: scale(1.05); }
-
-  /* P2E */
-  .p2e { background: var(--dark2); }
-  .p2e-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 2px;
-    max-width: 1060px;
-    margin: 0 auto;
-  }
-  .p2e-card {
-    padding: 38px 26px;
-    background: rgba(255,80,0,0.03);
-    border: 1px solid rgba(255,107,0,0.1);
-    text-align: center;
-    transition: all 0.3s;
-    position: relative;
-    overflow: hidden;
-  }
-  .p2e-card:hover {
-    background: rgba(255,80,0,0.07);
-    border-color: rgba(255,107,0,0.3);
-    transform: translateY(-4px);
-    box-shadow: 0 8px 30px rgba(255,80,0,0.1);
-  }
-  .p2e-card::after {
-    content: '';
-    position: absolute;
-    bottom: 0; left: 0; right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, var(--fire1), transparent);
-    opacity: 0;
-    transition: opacity 0.3s;
-  }
-  .p2e-card:hover::after { opacity: 1; }
-  .p2e-ico { font-size: 34px; margin-bottom: 14px; display: block; }
-  .p2e-card h3 {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 11px;
-    letter-spacing: 2px;
-    color: var(--fire3);
-    margin-bottom: 10px;
-    text-transform: uppercase;
-  }
-  .p2e-card p { color: var(--muted); font-size: 14px; line-height: 1.6; }
-
-  /* STEPS */
-  .howto { background: var(--dark); }
-  .howto-inner {
-    max-width: 820px;
-    margin: 0 auto;
-  }
-  .steps { position: relative; margin-top: 56px; }
-  .steps::before {
-    content: '';
-    position: absolute;
-    left: 27px; top: 0; bottom: 0;
-    width: 1px;
-    background: linear-gradient(180deg, var(--fire2), var(--fire3), var(--fire1), var(--fire2));
-    box-shadow: 0 0 8px rgba(255,107,0,0.4);
-  }
-  .step {
-    display: flex;
-    gap: 28px;
-    padding: 22px 0;
-    align-items: flex-start;
-  }
-  .step-n {
-    width: 54px; height: 54px;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: 'Orbitron', sans-serif;
-    font-size: 17px;
-    font-weight: 900;
-    color: #060000;
-    background: linear-gradient(135deg, var(--fire2), var(--fire3));
-    clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
-    z-index: 1;
-    box-shadow: 0 0 16px rgba(255,107,0,0.5);
-  }
-  .step-c h3 {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 12px;
-    letter-spacing: 1px;
-    color: var(--fire3);
-    margin-bottom: 8px;
-    text-transform: uppercase;
-  }
-  .step-c p { color: var(--muted); line-height: 1.7; font-size: 15px; }
-
-  /* EVENTS */
-  .events { background: var(--dark3); }
-  .ev-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
-    gap: 14px;
-    max-width: 1060px;
-    margin: 0 auto;
-  }
-  .ev-card {
-    padding: 26px;
-    border: 1px solid rgba(255,255,255,0.05);
-    background: rgba(255,60,0,0.02);
-    position: relative;
-    overflow: hidden;
-    transition: all 0.3s;
-  }
-  .ev-card:hover {
-    border-color: rgba(255,107,0,0.25);
-    background: rgba(255,60,0,0.05);
-    transform: translateY(-4px);
-    box-shadow: 0 8px 30px rgba(255,80,0,0.08);
-  }
-  .ev-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0;
-    width: 3px; height: 100%;
-    background: linear-gradient(180deg, var(--fire2), var(--fire3), var(--fire1));
-    box-shadow: 0 0 10px rgba(255,107,0,0.4);
-  }
-  .ev-time {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 8px;
-    letter-spacing: 3px;
-    color: var(--fire1);
-    text-transform: uppercase;
-    margin-bottom: 8px;
-    display: block;
-  }
-  .ev-card h3 {
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--text);
-    margin-bottom: 8px;
-  }
-  .ev-card p { color: var(--muted); font-size: 14px; line-height: 1.6; }
-  .ev-reward {
-    margin-top: 14px;
-    font-family: 'Orbitron', sans-serif;
-    font-size: 10px;
-    color: var(--fire3);
-    letter-spacing: 1px;
-  }
-
-  /* DOWNLOAD */
-  .download {
-    background: var(--dark);
-    text-align: center;
-    padding: 100px 40px;
-    position: relative;
-    overflow: hidden;
-  }
-  .download::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background-image:
-      linear-gradient(rgba(255,107,0,0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255,107,0,0.03) 1px, transparent 1px);
-    background-size: 44px 44px;
-  }
-  .dl-glow {
-    position: absolute;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    width: 600px; height: 400px;
-    background: radial-gradient(ellipse, rgba(255,80,0,0.07) 0%, transparent 70%);
-    pointer-events: none;
-  }
-  .dl-inner {
-    position: relative;
-    z-index: 1;
-    max-width: 680px;
-    margin: 0 auto;
-  }
-  .dl-logo {
-    width: min(320px, 70vw);
-    margin-bottom: 24px;
-    filter: drop-shadow(0 0 20px rgba(255,100,0,0.5));
-  }
-  .dl-inner h2 {
-    font-family: 'Cinzel Decorative', cursive;
-    font-size: clamp(20px, 3.5vw, 36px);
-    background: linear-gradient(135deg, var(--fire3), var(--fire1));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    margin-bottom: 14px;
-  }
-  .dl-inner p { color: var(--muted); margin-bottom: 40px; font-size: 16px; line-height: 1.7; }
-  .dl-btns { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
-  .dl-btn {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 11px;
-    letter-spacing: 2px;
-    padding: 16px 38px;
-    font-weight: 900;
-    border: none;
-    cursor: pointer;
-    clip-path: polygon(12px 0%, 100% 0%, calc(100% - 12px) 100%, 0% 100%);
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    transition: all 0.3s;
-    text-transform: uppercase;
-  }
-  .dl-btn.pc {
-    background: linear-gradient(135deg, var(--fire2), var(--fire1), var(--fire3));
-    color: #060000;
-    box-shadow: 0 0 20px rgba(255,80,0,0.4);
-  }
-  .dl-btn.pc:hover { box-shadow: 0 0 40px rgba(255,100,0,0.7); transform: scale(1.05); }
-  .dl-btn.apk {
-    background: transparent;
-    color: var(--fire4);
-    border: 1px solid rgba(255,140,0,0.4);
-  }
-  .dl-btn.apk:hover { background: rgba(255,107,0,0.1); box-shadow: 0 0 20px rgba(255,107,0,0.3); transform: scale(1.05); }
-
-  /* FOOTER */
-  footer {
-    background: rgba(0,0,0,0.6);
-    padding: 44px 40px;
-    text-align: center;
-    border-top: 1px solid rgba(255,107,0,0.12);
-    position: relative;
-    z-index: 1;
-  }
-  .footer-logo img {
-    height: 56px;
-    filter: drop-shadow(0 0 10px rgba(255,107,0,0.5));
-    margin-bottom: 20px;
-  }
-  .ft-links {
-    display: flex;
-    gap: 28px;
-    justify-content: center;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
-  }
-  .ft-links a {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 9px;
-    letter-spacing: 2px;
-    color: var(--muted);
-    text-decoration: none;
-    text-transform: uppercase;
-    transition: color 0.3s;
-  }
-  .ft-links a:hover { color: var(--fire3); }
-  .socials {
-    display: flex;
-    gap: 12px;
-    justify-content: center;
-    margin-bottom: 20px;
-  }
-  .soc {
-    width: 40px; height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid rgba(255,107,0,0.2);
-    color: var(--muted);
-    text-decoration: none;
-    font-size: 15px;
-    transition: all 0.3s;
-    clip-path: polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%);
-  }
-  .soc:hover { background: rgba(255,107,0,0.12); color: var(--fire3); border-color: var(--fire1); box-shadow: 0 0 14px rgba(255,107,0,0.3); }
-  footer p { color: var(--muted); font-size: 12px; line-height: 1.8; }
-
-  @media (max-width: 768px) {
-    nav ul { display: none; }
-    .srv-grid { grid-template-columns: 1fr; }
-    .srv-card.asia2 { min-height: 480px; }
-    .sec { padding: 70px 20px; }
-    nav { padding: 14px 20px; }
-  }
-
-  /* ══════════════════════════════════
-     EXTRA EFFECTS
-  ══════════════════════════════════ */
-
-  /* Custom fire cursor */
-  body { cursor: none; }
-  #cursor {
-    position: fixed;
-    width: 14px; height: 14px;
-    background: radial-gradient(circle, #FFD700 0%, #FF6B00 50%, transparent 100%);
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: 9999;
-    transform: translate(-50%, -50%);
-    transition: transform 0.05s;
-    box-shadow: 0 0 10px #FF6B00, 0 0 20px rgba(255,107,0,0.5);
-    mix-blend-mode: screen;
-  }
-  #cursor-trail {
-    position: fixed;
-    pointer-events: none;
-    z-index: 9998;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-  }
-
-  /* Lava crack overlay on hero */
-  .lava-cracks {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    z-index: 0;
-    overflow: hidden;
-  }
-  .crack {
-    position: absolute;
-    background: linear-gradient(var(--angle, 45deg), transparent 40%, rgba(255,80,0,0.4) 50%, transparent 60%);
-    opacity: 0;
-    animation: crackFlash var(--dur, 6s) ease-in-out var(--delay, 0s) infinite;
-  }
-  @keyframes crackFlash {
-    0%, 85%, 100% { opacity: 0; }
-    88%, 92% { opacity: 0.6; }
-    90% { opacity: 1; }
-  }
-
-  /* Scroll-reveal */
-  .reveal {
-    opacity: 0;
-    transform: translateY(40px);
-    transition: opacity 0.7s ease, transform 0.7s ease;
-  }
-  .reveal.visible {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  .reveal-left {
-    opacity: 0;
-    transform: translateX(-50px);
-    transition: opacity 0.7s ease, transform 0.7s ease;
-  }
-  .reveal-left.visible { opacity: 1; transform: translateX(0); }
-  .reveal-right {
-    opacity: 0;
-    transform: translateX(50px);
-    transition: opacity 0.7s ease, transform 0.7s ease;
-  }
-  .reveal-right.visible { opacity: 1; transform: translateX(0); }
-
-  /* Stagger delays for grid children */
-  .p2e-card:nth-child(1) { transition-delay: 0.05s; }
-  .p2e-card:nth-child(2) { transition-delay: 0.12s; }
-  .p2e-card:nth-child(3) { transition-delay: 0.19s; }
-  .p2e-card:nth-child(4) { transition-delay: 0.26s; }
-  .p2e-card:nth-child(5) { transition-delay: 0.33s; }
-  .p2e-card:nth-child(6) { transition-delay: 0.40s; }
-
-  /* Lightning bolt effect */
-  #lightning-canvas {
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    z-index: 5;
-    opacity: 0;
-    transition: opacity 0.05s;
-  }
-
-  /* Vignette fire border around screen */
-  .fire-vignette {
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    z-index: 4;
-    background:
-      radial-gradient(ellipse 100% 100% at 50% 50%, transparent 55%, rgba(180,30,0,0.18) 80%, rgba(120,10,0,0.35) 100%);
-    animation: vignetteBreath 4s ease-in-out infinite;
-  }
-  @keyframes vignetteBreath {
-    0%, 100% { opacity: 0.7; }
-    50% { opacity: 1; }
-  }
-
-  /* Glowing section dividers */
-  .fire-sep {
-    width: 100%;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(255,80,0,0.1), rgba(255,140,0,0.5), rgba(255,80,0,0.1), transparent);
-    position: relative;
-    overflow: visible;
-  }
-  .fire-sep::after {
-    content: '🔥';
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 18px;
-    filter: drop-shadow(0 0 8px rgba(255,100,0,0.8));
-    animation: sepPulse 2s ease-in-out infinite;
-  }
-  @keyframes sepPulse {
-    0%, 100% { transform: translate(-50%, -50%) scale(1); }
-    50% { transform: translate(-50%, -50%) scale(1.3); filter: drop-shadow(0 0 14px rgba(255,150,0,1)); }
-  }
-
-  /* Floating rune particles */
-  .rune {
-    position: fixed;
-    pointer-events: none;
-    font-size: 14px;
-    color: rgba(255,107,0,0.3);
-    animation: runeFloat linear infinite;
-    z-index: 1;
-    user-select: none;
-  }
-  @keyframes runeFloat {
-    0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
-    10% { opacity: 0.5; }
-    90% { opacity: 0.2; }
-    100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
-  }
-
-  /* Hero text glitch effect */
-  @keyframes glitch1 {
-    0%, 90%, 100% { clip-path: none; transform: none; }
-    92% { clip-path: inset(20% 0 60% 0); transform: translate(-3px, 0); }
-    94% { clip-path: inset(60% 0 10% 0); transform: translate(3px, 0); }
-    96% { clip-path: none; transform: none; }
-  }
-  .hero-logo { animation: logoFloat 4s ease-in-out infinite, logoGlitch 8s ease-in-out infinite; }
-  @keyframes logoGlitch {
-    0%, 88%, 100% { filter: drop-shadow(0 0 30px rgba(255,100,0,0.5)) drop-shadow(0 0 60px rgba(255,60,0,0.3)); }
-    90% { filter: drop-shadow(0 0 30px rgba(255,100,0,0.5)) drop-shadow(4px 0 0 rgba(255,0,0,0.4)) drop-shadow(-4px 0 0 rgba(0,200,255,0.2)); }
-    91% { filter: drop-shadow(0 0 40px rgba(255,120,0,0.7)); }
-  }
-
-  /* Heat shimmer on server cards */
-  @keyframes heatShimmer {
-    0%, 100% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-  }
-
-  /* Pulse rings on P2E icons */
-  .p2e-card:hover .p2e-ico::after {
-    content: '';
-    position: absolute;
-    inset: -8px;
-    border-radius: 50%;
-    border: 1px solid rgba(255,107,0,0.4);
-    animation: ringPulse 0.6s ease-out forwards;
-  }
-  @keyframes ringPulse {
-    0% { transform: scale(0.8); opacity: 1; }
-    100% { transform: scale(2); opacity: 0; }
-  }
-  .p2e-ico { position: relative; display: inline-block; }
-
-  /* Screen edge fire lick */
-  .edge-fire-left, .edge-fire-right {
-    position: fixed;
-    top: 0; bottom: 0;
-    width: 6px;
-    pointer-events: none;
-    z-index: 3;
-    animation: edgeFire 3s ease-in-out infinite;
-  }
-  .edge-fire-left {
-    left: 0;
-    background: linear-gradient(to right, rgba(255,60,0,0.15), transparent);
-  }
-  .edge-fire-right {
-    right: 0;
-    background: linear-gradient(to left, rgba(255,60,0,0.15), transparent);
-  }
-  @keyframes edgeFire {
-    0%, 100% { opacity: 0.5; }
-    50% { opacity: 1; }
-  }
-
-  /* Particle burst on button click */
-  .burst-particle {
-    position: fixed;
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: 9999;
-    animation: burst 0.8s ease-out forwards;
-  }
-  @keyframes burst {
-    0% { transform: translate(0,0) scale(1); opacity: 1; }
-    100% { transform: translate(var(--bx), var(--by)) scale(0); opacity: 0; }
-  }
+/* RESPONSIVE */
+@media(max-width:880px){
+  nav{padding:0 22px;} .nav-links{display:none;}
+  .srv-grid{grid-template-columns:1fr;} .dual{grid-template-columns:1fr;}
+  .p2e-grid{grid-template-columns:1fr 1fr;} .ev-grid{grid-template-columns:1fr;}
+  .inner{padding:0 20px;} .how-inner{padding:0 20px;}
+}
+@media(max-width:580px){
+  .p2e-grid{grid-template-columns:1fr;}
+  .hero-stats{flex-direction:column;}
+  .st::after{display:none;}
+}
 </style>
 </head>
 <body>
 
-<canvas id="fireCanvas"></canvas>
-<canvas id="lightning-canvas" style="position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:5;"></canvas>
-<div class="ember-bg"></div>
-<div class="fire-vignette"></div>
-<div class="edge-fire-left"></div>
-<div class="edge-fire-right"></div>
-<div id="cursor"></div>
+<!-- Fixed layers -->
+<canvas id="bg-canvas"></canvas>
+<canvas id="trail-canvas"></canvas>
+<div class="vignette"></div>
+<div id="cdot"></div>
+<div id="cring"></div>
 
-<!-- NAV -->
-<nav>
-  <a href="#" class="nav-logo">
-    <div class="nav-logo-emblem">🔥</div>
-    <div class="nav-logo-text">
-      <span class="brand">BabyRan</span>
-      <span class="sub">Inferno</span>
+<!-- ═══ NAV ═══ -->
+<nav id="nav">
+  <a href="#" class="brand">
+    <div class="brand-hex">🔥</div>
+    <div class="brand-text">
+      <span class="brand-name">BabyRan</span>
+      <span class="brand-tag">Inferno</span>
     </div>
   </a>
-
-  <ul>
+  <ul class="nav-links">
     <li><a href="#servers">Servers</a></li>
     <li><a href="#p2e">Play to Earn</a></li>
     <li><a href="#events">Events</a></li>
     <li><a href="#download">Download</a></li>
   </ul>
-
-  <a href="#download" class="nav-cta">
-    <span class="cta-icon">⚔</span>
-    Play Now
-  </a>
+  <a href="#download" class="nav-btn">⚔&nbsp; Play Free</a>
 </nav>
 
-<!-- HERO -->
-<section class="hero">
+<!-- ═══ HERO ═══ -->
+<section class="hero" id="home">
   <div class="hero-grid"></div>
-
-  <img
-    src="/mnt/user-data/uploads/1771381898467_31cd4aba-a74d-4e8b-b43d-ee696a59b4f9.png"
-    alt="BabyRan Inferno"
-    class="hero-logo"
-  >
-
-  <div class="p2e-badge">🔥 PLAY TO EARN 🔥</div>
-
-  <p class="hero-tagline">
-    The ultimate <strong>Ran Online private server</strong> reborn in flames.<br>
-    Choose your path — <strong>Combo Base</strong> or <strong>Hunt Base</strong> — and earn real rewards as you rise.
-  </p>
-
+  <div class="hero-orb"></div>
+  <img src="/mnt/user-data/uploads/1771381898467_31cd4aba-a74d-4e8b-b43d-ee696a59b4f9.png"
+       alt="BabyRan Inferno" class="hero-logo" id="hlogo">
+  <div class="hero-pill"><span class="live-dot"></span>Play to Earn — Live Now</div>
+  <p class="hero-sub">The premier <strong>Ran Online private server</strong> experience.<br>Asia's most competitive MMORPG — battle, hunt, earn.</p>
   <div class="hero-btns">
-    <a href="#download" class="btn-fire">⚔ Enter the Inferno</a>
-    <a href="#servers" class="btn-outline">◈ View Servers</a>
+    <a href="#download" class="btn-A">Start Playing Free</a>
+    <a href="#servers" class="btn-B">Explore Servers</a>
   </div>
-
-  <div class="stats-row">
-    <div class="stat">
-      <span class="stat-n" data-count="2400">2,400+</span>
-      <span class="stat-l">Active Players</span>
-    </div>
-    <div class="stat">
-      <span class="stat-n">2</span>
-      <span class="stat-l">Game Servers</span>
-    </div>
-    <div class="stat">
-      <span class="stat-n">24/7</span>
-      <span class="stat-l">Online & Stable</span>
-    </div>
-    <div class="stat">
-      <span class="stat-n">FREE</span>
-      <span class="stat-l">To Play</span>
-    </div>
+  <div class="hero-stats">
+    <div class="st"><span class="sn" data-count="2400">0</span><span class="sl">Active Players</span></div>
+    <div class="st"><span class="sn">1</span><span class="sl">Live Server</span></div>
+    <div class="st"><span class="sn">24/7</span><span class="sl">Uptime</span></div>
+    <div class="st"><span class="sn">FREE</span><span class="sl">To Play</span></div>
   </div>
 </section>
 
-<!-- SERVERS -->
-<section class="sec servers" id="servers">
-  <div class="sec-inner">
-    <div class="sec-head reveal">
-      <span class="sec-tag">Choose Your Path</span>
-      <h2 class="sec-title">Two Infernal Servers</h2>
-      <p class="sec-sub">Both servers burn with the same fire — pick the gameplay style that suits your warrior soul.</p>
-      <div class="flame-divider"></div>
+<!-- ═══ SERVERS ═══ -->
+<section class="srv-sec" id="servers">
+  <div class="inner">
+    <div class="rev">
+      <span class="sec-label">Infrastructure</span>
+      <h2 class="sec-title">Choose Your <em>Server</em></h2>
+      <p class="sec-desc">One live battle-hardened server. A second rising from the flames.</p>
+      <div class="tline"></div>
     </div>
-
     <div class="srv-grid">
-
-      <!-- ASIA 1 — LIVE -->
-      <div class="srv-card asia1 reveal-left">
-        <div class="asia1-top">
-          <div class="server-region-badge">
-            <span class="odot"></span>
-            <span class="online-txt">LIVE — ASIA 1</span>
+      <div class="asia1 rev-l">
+        <span class="live-tag"><span class="live-dot"></span>Online — Asia 1</span>
+        <h2 class="card-t">🌏 ASIA 1</h2>
+        <p class="card-d">BabyRan Inferno's flagship server — <strong>battle-tested, stable</strong> and alive with thousands of warriors. Features both Combo Base and Hunt Base in one unified server.</p>
+        <div class="dual">
+          <div class="mode">
+            <span class="mode-ico">⚔️</span>
+            <div class="mode-n">Combo Base</div>
+            <p class="mode-d">Chain combos, PvP arenas, Guild Wars & ranked tournaments.</p>
           </div>
-          <span class="srv-badge">Now Available</span>
-        </div>
-
-        <h2 class="srv-name">🌏 ASIA 1</h2>
-        <p class="srv-desc">The first and only active BabyRan Inferno server — battle-tested and packed with thousands of warriors. ASIA 1 features <strong style="color:var(--fire3)">both Combo Base and Hunt Base</strong> gameplay in one blazing server.</p>
-
-        <div class="dual-modes">
-          <div class="mode-card">
-            <span class="mode-icon">⚔️</span>
-            <div>
-              <div class="mode-title">Combo Base</div>
-              <div class="mode-desc">Chain combos, PvP arenas, Guild Wars, ranked leaderboards & weekly tournaments.</div>
-            </div>
-          </div>
-          <div class="mode-divider">✦ &nbsp; PLUS &nbsp; ✦</div>
-          <div class="mode-card">
-            <span class="mode-icon">🏹</span>
-            <div>
-              <div class="mode-title">Hunt Base</div>
-              <div class="mode-desc">Elite monster farming, rare drops, player economy, dungeon raids & crafting.</div>
-            </div>
+          <div class="mode">
+            <span class="mode-ico">🏹</span>
+            <div class="mode-n">Hunt Base</div>
+            <p class="mode-d">Elite farming, legendary drops, dungeons & player economy.</p>
           </div>
         </div>
-
-        <ul class="feat-list">
-          <li>High-Rate EXP & Drop</li>
-          <li>Combo Skill System Enabled</li>
-          <li>Elite Monster Hunting & Rare Drops</li>
-          <li>Guild Wars, PvP Arenas & Castle Siege</li>
+        <ul class="fl">
+          <li>High-Rate EXP & Drop System</li>
+          <li>Full Combo Skill Chain Enabled</li>
+          <li>Elite Monsters & Legendary Loot</li>
+          <li>Guild Wars, PvP & Castle Siege</li>
           <li>Player-Driven Economy & Crafting</li>
           <li>Weekly Tournaments & Boss Raids</li>
-          <li>Play to Earn — Real Rewards</li>
+          <li>Play to Earn — Real Rewards Daily</li>
         </ul>
-
-        <div class="online-row" style="margin-bottom:28px;">
-          <span class="odot"></span>
-          <span class="online-txt">ONLINE — 2,400+ Active Players</span>
-        </div>
-        <a href="#download" class="srv-btn" style="padding:16px 44px; font-size:11px;">⚔ Play on ASIA 1</a>
+        <div class="online-r"><span class="live-dot"></span>2,400+ Warriors Online</div>
+        <a href="#download" class="gold-btn">Enter ASIA 1 &nbsp;→</a>
       </div>
-
-      <!-- ASIA 2 — COMING SOON -->
-      <div class="srv-card asia2 reveal-right">
-        <div class="soon-overlay">
-          <div class="soon-content">
-            <div class="soon-badge">🔒 &nbsp; COMING SOON</div>
-            <h2 class="soon-title">🌏 ASIA 2</h2>
-            <p class="soon-desc">The second server is rising from the flames. ASIA 2 will bring fresh rankings, a new economy, and an even more intense battlefield.</p>
-            <div class="soon-features">
-              <div class="soon-feat">⚔ New Economy</div>
-              <div class="soon-feat">🏆 Fresh Rankings</div>
-              <div class="soon-feat">🔥 Enhanced Rates</div>
-              <div class="soon-feat">🌐 Cross-Server Events</div>
-            </div>
-            <div class="notify-box">
-              <input type="email" class="notify-input" placeholder="Your email...">
-              <button class="notify-btn">Notify Me</button>
-            </div>
-            <p class="soon-note">Be first to know when ASIA 2 ignites.</p>
+      <div class="asia2 rev-r">
+        <div class="cs-inner">
+          <div class="cs-hex">🔒</div>
+          <span class="cs-tag">Coming Soon</span>
+          <h2 class="cs-title">ASIA 2</h2>
+          <p class="cs-desc">The second front is being forged. Fresh rankings, an independent economy and enhanced drop rates await.</p>
+          <div class="cs-feats">
+            <div class="cs-f">⚔ New Economy</div>
+            <div class="cs-f">🏆 Fresh Ranks</div>
+            <div class="cs-f">🔥 Enhanced Rates</div>
+            <div class="cs-f">🌐 Cross Events</div>
           </div>
+          <div class="cs-form">
+            <input type="email" class="cs-inp" placeholder="Email for early access...">
+            <button class="cs-sbm" id="notifyBtn">Notify Me</button>
+          </div>
+          <span class="cs-note">Be first to ignite on ASIA 2.</span>
         </div>
       </div>
-
     </div>
   </div>
 </section>
-<div class="fire-sep" style="margin:0;"></div>
 
-<!-- P2E -->
-<section class="sec p2e" id="p2e">
-  <div class="sec-inner">
-    <div class="sec-head reveal">
-      <span class="sec-tag">Real Rewards</span>
-      <h2 class="sec-title">Play to Earn</h2>
-      <p class="sec-sub">Your skill and grind are worth real rewards. BabyRan Inferno pays dedicated players.</p>
-      <div class="flame-divider"></div>
+<div class="inner" style="padding-top:0;padding-bottom:0;"><div class="hr-orn"></div></div>
+
+<!-- ═══ P2E ═══ -->
+<section class="p2e-sec" id="p2e">
+  <div class="inner">
+    <div class="p2e-head">
+      <div class="rev">
+        <span class="sec-label">Earn Real Value</span>
+        <h2 class="sec-title">Play to <em>Earn</em></h2>
+        <div class="tline"></div>
+      </div>
+      <p class="sec-desc rev" style="text-align:right;max-width:280px;">Six proven ways to generate real rewards from every session.</p>
     </div>
     <div class="p2e-grid">
-      <div class="p2e-card reveal">
-        <span class="p2e-ico">💰</span>
-        <h3>Earn Gold</h3>
-        <p>Hunt monsters, complete quests and win events to earn in-game gold with real value.</p>
-      </div>
-      <div class="p2e-card reveal">
-        <span class="p2e-ico">💎</span>
-        <h3>Rare Items</h3>
-        <p>Farm and trade legendary equipment. Top gear holds real market value in our player economy.</p>
-      </div>
-      <div class="p2e-card reveal">
-        <span class="p2e-ico">🏆</span>
-        <h3>Tournament Prizes</h3>
-        <p>Weekly and monthly PvP & PvE tournaments with cash prizes and exclusive rewards.</p>
-      </div>
-      <div class="p2e-card reveal">
-        <span class="p2e-ico">🎟️</span>
-        <h3>Event Tokens</h3>
-        <p>Earn tokens through daily quests and special events. Redeem in the exclusive P2E shop.</p>
-      </div>
-      <div class="p2e-card reveal">
-        <span class="p2e-ico">🤝</span>
-        <h3>Referral Rewards</h3>
-        <p>Invite friends and earn bonus credits for every active player you recruit.</p>
-      </div>
-      <div class="p2e-card reveal">
-        <span class="p2e-ico">🌐</span>
-        <h3>Player Market</h3>
-        <p>Buy, sell and trade items freely. The entire economy is player-driven.</p>
-      </div>
+      <div class="pc rev d1"><div class="pc-ico">💰</div><h3>Gold Farming</h3><p>Hunt monsters, complete quests and win events to accumulate gold with real market value.</p></div>
+      <div class="pc rev d2"><div class="pc-ico">💎</div><h3>Rare Item Trade</h3><p>Farm legendary equipment and sell it through our player marketplace at premium rates.</p></div>
+      <div class="pc rev d3"><div class="pc-ico">🏆</div><h3>Tournament Prize</h3><p>Weekly and monthly PvP & PvE championships with cash prizes and exclusive rewards.</p></div>
+      <div class="pc rev d4"><div class="pc-ico">🎟️</div><h3>Event Tokens</h3><p>Complete daily missions and special events to earn tokens redeemable in the P2E shop.</p></div>
+      <div class="pc rev d5"><div class="pc-ico">🤝</div><h3>Referral Program</h3><p>Recruit active warriors and earn bonus credits for every player who joins and plays.</p></div>
+      <div class="pc rev d6"><div class="pc-ico">🌐</div><h3>Player Marketplace</h3><p>A fully player-driven economy — buy, sell and negotiate. Supply and demand rule all prices.</p></div>
     </div>
   </div>
 </section>
-<div class="fire-sep" style="margin:0;"></div>
 
-<!-- HOW TO PLAY -->
-<section class="sec howto" id="howto">
-  <div class="howto-inner">
-    <div class="sec-head reveal">
-      <span class="sec-tag">Getting Started</span>
-      <h2 class="sec-title">How to Play</h2>
-      <div class="flame-divider"></div>
+<div class="inner" style="padding-top:0;padding-bottom:0;"><div class="hr-orn"></div></div>
+
+<!-- ═══ HOW TO ═══ -->
+<section class="how-sec" id="howto">
+  <div class="how-inner">
+    <div class="rev">
+      <span class="sec-label">Getting Started</span>
+      <h2 class="sec-title">Five Steps to <em>Battle</em></h2>
+      <div class="tline"></div>
     </div>
     <div class="steps">
-      <div class="step reveal">
-        <div class="step-n">01</div>
-        <div class="step-c">
-          <h3>Register Your Account</h3>
-          <p>Create your free BabyRan Inferno account. Sign up in less than a minute — no credit card needed.</p>
-        </div>
-      </div>
-      <div class="step reveal">
-        <div class="step-n">02</div>
-        <div class="step-c">
-          <h3>Download the Client</h3>
-          <p>Download and install the BabyRan Inferno game client for Windows PC or Android mobile device.</p>
-        </div>
-      </div>
-      <div class="step reveal">
-        <div class="step-n">03</div>
-        <div class="step-c">
-          <h3>Choose Your Server</h3>
-          <p>Select the <strong style="color:var(--fire3)">Combo Base Server</strong> for PvP intensity or the <strong style="color:var(--fire3)">Hunt Base Server</strong> for farming and economy play.</p>
-        </div>
-      </div>
-      <div class="step reveal">
-        <div class="step-n">04</div>
-        <div class="step-c">
-          <h3>Create Your Character</h3>
-          <p>Pick your school, customize your fighter, and choose your combat style — Swordsman, Brawler, or more.</p>
-        </div>
-      </div>
-      <div class="step reveal">
-        <div class="step-n">05</div>
-        <div class="step-c">
-          <h3>Hunt, Earn & Dominate</h3>
-          <p>Battle monsters, complete quests, join guild wars, and climb the rankings. Your earnings start now.</p>
-        </div>
-      </div>
+      <div class="step rev d1"><div class="step-n">01</div><div class="step-b"><h3>Create Your Account</h3><p>Register in under 60 seconds. No credit card, no fee — your warrior identity is free.</p></div></div>
+      <div class="step rev d2"><div class="step-n">02</div><div class="step-b"><h3>Download the Client</h3><p>Get the BabyRan Inferno client for Windows PC or Android — optimized for both platforms.</p></div></div>
+      <div class="step rev d3"><div class="step-n">03</div><div class="step-b"><h3>Select ASIA 1</h3><p>Log into the live ASIA 1 server — home to thousands of active warriors and daily events.</p></div></div>
+      <div class="step rev d4"><div class="step-n">04</div><div class="step-b"><h3>Build Your Character</h3><p>Choose your school and combat style. Swordsman, Brawler, Archer — master your discipline.</p></div></div>
+      <div class="step rev d5"><div class="step-n">05</div><div class="step-b"><h3>Hunt, Fight & Earn</h3><p>Enter dungeons, join Guild Wars, farm rare loot and climb the rankings. Every action earns.</p></div></div>
     </div>
   </div>
 </section>
-<div class="fire-sep" style="margin:0;"></div>
 
-<!-- EVENTS -->
-<section class="sec events" id="events">
-  <div class="sec-inner">
-    <div class="sec-head reveal">
-      <span class="sec-tag">Live & Upcoming</span>
-      <h2 class="sec-title">Inferno Events</h2>
-      <p class="sec-sub">Regular events keep the flame burning and reward active warriors generously.</p>
-      <div class="flame-divider"></div>
+<!-- ═══ EVENTS ═══ -->
+<section class="ev-sec" id="events">
+  <div class="inner">
+    <div class="rev">
+      <span class="sec-label">Live & Scheduled</span>
+      <h2 class="sec-title">Inferno <em>Events</em></h2>
+      <p class="sec-desc">Regular battles keep the fire burning. Something powerful is always happening.</p>
+      <div class="tline"></div>
     </div>
-    <div class="ev-grid">
-      <div class="ev-card reveal">
-        <span class="ev-time">🔴 LIVE NOW</span>
-        <h3>Boss Raid: Dark Dragon</h3>
-        <p>Team up and slay the Dark Dragon in the Chaos Dungeon. Massive loot for top damage dealers.</p>
-        <div class="ev-reward">🏆 Dragon Armor Set + 50,000 Gold</div>
-      </div>
-      <div class="ev-card reveal">
-        <span class="ev-time">⏰ EVERY WEEKEND</span>
-        <h3>PvP Colosseum</h3>
-        <p>Battle through the weekly PvP tournament bracket. Open to all players in both servers.</p>
-        <div class="ev-reward">🏆 Tournament Medal + Cash Prize</div>
-      </div>
-      <div class="ev-card reveal">
-        <span class="ev-time">📅 EVERY DAY</span>
-        <h3>Daily Quest Bonanza</h3>
-        <p>Complete daily missions to earn Event Tokens, bonus EXP boosts, and rare item fragments.</p>
-        <div class="ev-reward">🏆 Event Tokens + EXP Boost x2</div>
-      </div>
-      <div class="ev-card reveal">
-        <span class="ev-time">📅 MONTHLY</span>
-        <h3>Top Hunter Rankings</h3>
-        <p>Top 10 monster hunters on the Hunt Server each month receive legendary gear and gold.</p>
-        <div class="ev-reward">🏆 Legendary Weapon + 200,000 Gold</div>
-      </div>
-      <div class="ev-card reveal">
-        <span class="ev-time">🔥 EVERY FRIDAY</span>
-        <h3>Guild War Siege</h3>
-        <p>Guilds fight for control of the Sacred Castle. The ruling guild earns buffs and taxes all week.</p>
-        <div class="ev-reward">🏆 Castle Ownership + Guild Buffs</div>
-      </div>
-      <div class="ev-card reveal">
-        <span class="ev-time">🟡 ONGOING</span>
-        <h3>Referral Bonus Event</h3>
-        <p>Invite friends and earn bonus tokens for every active referral. No limit on earnings.</p>
-        <div class="ev-reward">🏆 1,000 Tokens per Active Referral</div>
-      </div>
+    <div class="ev-grid" id="eventsGrid">
+      <!-- Events loaded dynamically from localStorage -->
     </div>
   </div>
 </section>
-<div class="fire-sep" style="margin:0;"></div>
 
-<!-- DOWNLOAD -->
-<section class="download" id="download">
+<!-- ═══ DOWNLOAD ═══ -->
+<section class="dl-sec" id="download">
   <div class="dl-glow"></div>
-  <div class="dl-inner">
-    <img src="/mnt/user-data/uploads/1771381898467_31cd4aba-a74d-4e8b-b43d-ee696a59b4f9.png" alt="BabyRan Inferno" class="dl-logo">
-    <h2>Begin Your Inferno Journey</h2>
-    <p>Thousands of warriors are already hunting, fighting, and earning. Join them — download free and pick your server.</p>
-    <div class="dl-btns">
-      <a href="#" class="dl-btn pc">🖥 Download for PC</a>
-      <a href="#" class="dl-btn apk">📱 Android APK</a>
+  <div class="inner" style="position:relative;z-index:1;">
+    <img src="/mnt/user-data/uploads/1771381898467_31cd4aba-a74d-4e8b-b43d-ee696a59b4f9.png" alt="BabyRan Inferno" class="dl-logo rev">
+    <h2 class="dl-title rev">Begin Your <em>Inferno</em> Journey</h2>
+    <p class="dl-desc rev">Thousands of warriors are already fighting and earning. Download free, enter ASIA 1, and ignite your legend.</p>
+    <div class="dl-row">
+      <a href="#" class="dl-a rev d1">🖥&nbsp; Download for PC</a>
+      <a href="#" class="dl-b rev d2">📱&nbsp; Android APK</a>
     </div>
   </div>
 </section>
 
-<!-- FOOTER -->
+<!-- ═══ FOOTER ═══ -->
 <footer>
-  <div class="footer-logo">
-    <img src="/mnt/user-data/uploads/1771381898467_31cd4aba-a74d-4e8b-b43d-ee696a59b4f9.png" alt="BabyRan Inferno">
+  <div class="ft-inner">
+    <span class="ft-brand">BabyRan Inferno</span>
+    <ul class="ft-links">
+      <li><a href="#">Home</a></li><li><a href="#">Register</a></li>
+      <li><a href="#">Servers</a></li><li><a href="#">Events</a></li>
+      <li><a href="#">P2E Shop</a></li><li><a href="#">Support</a></li>
+      <li><a href="#">Facebook</a></li>
+    </ul>
+    <div class="ft-socials">
+      <a class="soc" href="#" title="Facebook">f</a>
+      <a class="soc" href="#" title="Discord">💬</a>
+      <a class="soc" href="#" title="YouTube">▶</a>
+      <a class="soc" href="#" title="Telegram">✈</a>
+    </div>
+    <p class="ft-copy">© 2025 BabyRan Inferno. All rights reserved.<br>Private Server — For Entertainment Purposes Only.</p>
   </div>
-  <div class="ft-links">
-    <a href="#">Home</a>
-    <a href="#">Register</a>
-    <a href="#">Servers</a>
-    <a href="#">Events</a>
-    <a href="#">P2E Shop</a>
-    <a href="#">Support</a>
-    <a href="#">Facebook</a>
-  </div>
-  <div class="socials">
-    <a class="soc" href="#" title="Facebook">f</a>
-    <a class="soc" href="#" title="Discord">💬</a>
-    <a class="soc" href="#" title="YouTube">▶</a>
-    <a class="soc" href="#" title="Telegram">✈</a>
-  </div>
-  <p>© 2025 BabyRan Inferno. All rights reserved.</p>
-  <p>Private Server — For Entertainment Purposes Only.</p>
 </footer>
 
 <script>
-// ═══════════════════════════════════════════════
-//  CUSTOM FIRE CURSOR
-// ═══════════════════════════════════════════════
-const cursorEl = document.getElementById('cursor');
-const trailCanvas = document.createElement('canvas');
-trailCanvas.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:9997;';
-document.body.appendChild(trailCanvas);
-const tctx = trailCanvas.getContext('2d');
-trailCanvas.width = window.innerWidth;
-trailCanvas.height = window.innerHeight;
-
-let mx = -100, my = -100;
-const trail = [];
-
-document.addEventListener('mousemove', e => {
-  mx = e.clientX; my = e.clientY;
-  cursorEl.style.left = mx + 'px';
-  cursorEl.style.top = my + 'px';
-  trail.push({ x: mx, y: my, life: 1, size: Math.random() * 5 + 3,
-    color: ['#FF6B00','#FF3D00','#FFB300','#FF8C00'][Math.floor(Math.random()*4)] });
-  if (trail.length > 40) trail.shift();
+/* ── CURSOR ── */
+const dot=document.getElementById('cdot'),ring=document.getElementById('cring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;});
+(function loopC(){
+  dot.style.left=mx+'px';dot.style.top=my+'px';
+  rx+=(mx-rx)*.11;ry+=(my-ry)*.11;
+  ring.style.left=rx+'px';ring.style.top=ry+'px';
+  requestAnimationFrame(loopC);
+})();
+document.querySelectorAll('a,button,.pc,.ec,.mode').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{dot.style.width='13px';dot.style.height='13px';ring.style.transform='translate(-50%,-50%) scale(1.5)';ring.style.borderColor='rgba(200,146,58,.8)';});
+  el.addEventListener('mouseleave',()=>{dot.style.width='7px';dot.style.height='7px';ring.style.transform='translate(-50%,-50%) scale(1)';ring.style.borderColor='rgba(200,146,58,.45)';});
 });
 
-function animTrail() {
-  tctx.clearRect(0, 0, trailCanvas.width, trailCanvas.height);
-  for (let i = trail.length - 1; i >= 0; i--) {
-    const t = trail[i];
-    t.life -= 0.06;
-    t.y -= 0.5;
-    t.x += (Math.random() - 0.5) * 0.5;
-    if (t.life <= 0) { trail.splice(i, 1); continue; }
-    tctx.save();
-    tctx.globalAlpha = t.life * 0.7;
-    tctx.shadowBlur = 12;
-    tctx.shadowColor = t.color;
-    tctx.fillStyle = t.color;
-    tctx.beginPath();
-    tctx.arc(t.x, t.y, t.size * t.life, 0, Math.PI * 2);
-    tctx.fill();
-    tctx.restore();
-  }
-  requestAnimationFrame(animTrail);
+/* ── BACKGROUND CANVAS: Stars + Embers ── */
+const bgC=document.getElementById('bg-canvas'),bgX=bgC.getContext('2d');
+function rsz(){bgC.width=innerWidth;bgC.height=innerHeight;}rsz();addEventListener('resize',rsz);
+
+const STARS=Array.from({length:130},()=>({x:Math.random()*innerWidth,y:Math.random()*innerHeight,r:Math.random()*.7+.15,ph:Math.random()*Math.PI*2,spd:Math.random()*.004+.002}));
+
+class E{
+  constructor(){this.init();}
+  init(){this.x=Math.random()*innerWidth;this.y=innerHeight+8;this.vx=(Math.random()-.5)*.9;this.vy=-(Math.random()*1.3+.35);this.r=Math.random()*2+.3;this.life=Math.random()*.6+.4;this.decay=Math.random()*.0022+.0007;this.wb=Math.random()*Math.PI*2;const cs=['255,130,45','255,185,65','255,82,22','255,215,95'];this.c=cs[Math.floor(Math.random()*cs.length)];}
+  step(){this.wb+=.03;this.x+=this.vx+Math.sin(this.wb)*.32;this.y+=this.vy;this.life-=this.decay;if(this.life<=0||this.y<-18)this.init();}
+  draw(){bgX.save();bgX.globalAlpha=this.life*.52;bgX.shadowBlur=7;bgX.shadowColor=`rgba(${this.c},.9)`;bgX.fillStyle=`rgba(${this.c},${this.life})`;bgX.beginPath();bgX.arc(this.x,this.y,this.r*this.life,0,Math.PI*2);bgX.fill();bgX.restore();}
 }
-animTrail();
+const embers=Array.from({length:75},()=>{const e=new E();e.y=Math.random()*innerHeight;return e;});
 
-// ═══════════════════════════════════════════════
-//  FIRE EMBER CANVAS
-// ═══════════════════════════════════════════════
-const canvas = document.getElementById('fireCanvas');
-const ctx = canvas.getContext('2d');
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+/* ── CURSOR TRAIL ── */
+const trC=document.getElementById('trail-canvas'),trX=trC.getContext('2d');
+function rszT(){trC.width=innerWidth;trC.height=innerHeight;}rszT();addEventListener('resize',rszT);
+const trail=[];
+document.addEventListener('mousemove',e=>{const cs=['255,145,52','255,205,85','255,85,30','200,150,60'];trail.push({x:e.clientX,y:e.clientY,life:1,r:Math.random()*3.5+1.5,c:cs[Math.floor(Math.random()*cs.length)]});if(trail.length>55)trail.shift();});
 
-window.addEventListener('resize', () => {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-  trailCanvas.width = window.innerWidth;
-  trailCanvas.height = window.innerHeight;
-  lcanvas.width = window.innerWidth;
-  lcanvas.height = window.innerHeight;
-});
+/* ── LIGHTNING ── */
+const lC=document.createElement('canvas');lC.style.cssText='position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:2;transition:opacity .08s;';document.body.appendChild(lC);
+const lX=lC.getContext('2d');
+function rszL(){lC.width=innerWidth;lC.height=innerHeight;}rszL();addEventListener('resize',rszL);
+function bolt(x1,y1,x2,y2,sp,d){if(d<=0)return;const mx=(x1+x2)/2+(Math.random()-.5)*sp,my=(y1+y2)/2+(Math.random()-.5)*sp;lX.beginPath();lX.moveTo(x1,y1);lX.lineTo(mx,my);lX.lineTo(x2,y2);lX.stroke();if(Math.random()<.33)bolt(mx,my,mx+(Math.random()-.5)*75,my+65,sp/2,d-1);bolt(x1,y1,mx,my,sp/2,d-1);bolt(mx,my,x2,y2,sp/2,d-1);}
+function lightning(){const x=Math.random()*lC.width;lX.clearRect(0,0,lC.width,lC.height);lX.strokeStyle=`rgba(255,${155+Math.random()*85},65,.82)`;lX.lineWidth=1;lX.shadowBlur=16;lX.shadowColor='#FFAA44';bolt(x,0,x+(Math.random()-.5)*170,lC.height*.52,95,4);lC.style.opacity='1';setTimeout(()=>{lC.style.opacity='0';lX.clearRect(0,0,lC.width,lC.height);},95);setTimeout(()=>{lX.clearRect(0,0,lC.width,lC.height);bolt(x,0,x+(Math.random()-.5)*100,lC.height*.42,65,3);lC.style.opacity='.55';setTimeout(()=>{lC.style.opacity='0';lX.clearRect(0,0,lC.width,lC.height);},75);},180);setTimeout(lightning,4500+Math.random()*9000);}
+setTimeout(lightning,3500);
 
-const FIRE_COLORS = ['rgba(255,80,0,','rgba(255,140,0,','rgba(255,200,0,','rgba(255,50,0,','rgba(255,60,20,'];
+/* ── MAIN LOOP ── */
+let tt=0;
+(function loop(){
+  tt+=.01;
+  /* stars */
+  bgX.clearRect(0,0,bgC.width,bgC.height);
+  STARS.forEach(s=>{const a=.25+Math.abs(Math.sin(tt*s.spd*28+s.ph))*.6;bgX.save();bgX.globalAlpha=a*.45;bgX.fillStyle='#B0A090';bgX.beginPath();bgX.arc(s.x,s.y,s.r,0,Math.PI*2);bgX.fill();bgX.restore();});
+  embers.forEach(e=>{e.step();e.draw();});
+  /* trail */
+  trX.clearRect(0,0,trC.width,trC.height);
+  for(let i=trail.length-1;i>=0;i--){const p=trail[i];p.life-=.05;p.y-=.45;p.x+=(Math.random()-.5)*.28;if(p.life<=0){trail.splice(i,1);continue;}trX.save();trX.globalAlpha=p.life*.62;trX.shadowBlur=9;trX.shadowColor=`rgba(${p.c},.9)`;trX.fillStyle=`rgba(${p.c},${p.life})`;trX.beginPath();trX.arc(p.x,p.y,p.r*p.life,0,Math.PI*2);trX.fill();trX.restore();}
+  requestAnimationFrame(loop);
+})();
 
-class Ember {
-  constructor(type) {
-    this.type = type || 'float';
-    this.reset();
-  }
-  reset() {
-    if (this.type === 'bottom') {
-      this.x = Math.random() * canvas.width;
-      this.y = canvas.height + 10;
-    } else {
-      this.x = Math.random() * canvas.width;
-      this.y = Math.random() * canvas.height;
-    }
-    this.vx = (Math.random() - 0.5) * 1.2;
-    this.vy = -(Math.random() * 2 + 0.5);
-    this.size = Math.random() * 3 + 0.8;
-    this.life = Math.random() * 0.5 + 0.5;
-    this.maxLife = this.life;
-    this.decay = Math.random() * 0.004 + 0.001;
-    this.color = FIRE_COLORS[Math.floor(Math.random() * FIRE_COLORS.length)];
-    this.wobble = Math.random() * Math.PI * 2;
-  }
-  update() {
-    this.wobble += 0.04;
-    this.x += this.vx + Math.sin(this.wobble) * 0.3;
-    this.y += this.vy;
-    this.life -= this.decay;
-    if (this.life <= 0 || this.y < -20) this.reset();
-  }
-  draw() {
-    const alpha = (this.life / this.maxLife);
-    ctx.save();
-    ctx.globalAlpha = alpha * 0.65;
-    ctx.shadowBlur = 10;
-    ctx.shadowColor = this.color + '1)';
-    ctx.fillStyle = this.color + (alpha * 0.9) + ')';
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, this.size * alpha, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.restore();
-  }
-}
+/* ── NAV SCROLL ── */
+const nav=document.getElementById('nav');
+addEventListener('scroll',()=>nav.classList.toggle('stuck',scrollY>50));
 
-const particles = [];
-for (let i = 0; i < 80; i++) {
-  const e = new Ember('bottom');
-  e.y = Math.random() * canvas.height;
-  particles.push(e);
-}
+/* ── LOGO PARALLAX ── */
+const hl=document.getElementById('hlogo');
+addEventListener('mousemove',e=>{if(!hl)return;const px=(e.clientX/innerWidth-.5)*9,py=(e.clientY/innerHeight-.5)*5;hl.style.transform=`rotateX(${-py}deg) rotateY(${px}deg)`;});
 
-function animFire() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  particles.forEach(p => { p.update(); p.draw(); });
-  requestAnimationFrame(animFire);
-}
-animFire();
+/* ── SCROLL REVEAL ── */
+const obs=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');obs.unobserve(e.target);}});},{threshold:.1});
+document.querySelectorAll('.rev,.rev-l,.rev-r').forEach(el=>obs.observe(el));
 
-// ═══════════════════════════════════════════════
-//  LIGHTNING STRIKES
-// ═══════════════════════════════════════════════
-const lcanvas = document.getElementById('lightning-canvas');
-const lctx = lcanvas.getContext('2d');
-lcanvas.width = window.innerWidth;
-lcanvas.height = window.innerHeight;
+/* ── COUNT UP ── */
+const co=new IntersectionObserver(es=>{es.forEach(e=>{if(!e.isIntersecting)return;const el=e.target,tgt=+el.dataset.count,dur=1900,t0=performance.now();(function tick(n){const p=Math.min((n-t0)/dur,1),ease=1-Math.pow(1-p,4);el.textContent=Math.floor(ease*tgt).toLocaleString()+'+';if(p<1)requestAnimationFrame(tick);})(t0);co.unobserve(el);});},{threshold:.5});
+document.querySelectorAll('[data-count]').forEach(el=>co.observe(el));
 
-function drawBolt(x1, y1, x2, y2, spread, depth) {
-  if (depth <= 0) return;
-  const mx = (x1 + x2) / 2 + (Math.random() - 0.5) * spread;
-  const my = (y1 + y2) / 2 + (Math.random() - 0.5) * spread;
-  lctx.beginPath();
-  lctx.moveTo(x1, y1);
-  lctx.lineTo(mx, my);
-  lctx.lineTo(x2, y2);
-  lctx.stroke();
-  if (Math.random() < 0.4) drawBolt(mx, my, mx + (Math.random()-0.5)*100, my + 80, spread/2, depth-1);
-  drawBolt(x1, y1, mx, my, spread/2, depth-1);
-  drawBolt(mx, my, x2, y2, spread/2, depth-1);
-}
+/* ── CLICK BURST ── */
+document.addEventListener('click',e=>{const cs=['255,145,52','255,205,85','255,85,30','200,150,60'];for(let i=0;i<13;i++){const b=document.createElement('div'),ang=(i/13)*Math.PI*2,d=32+Math.random()*48;b.className='burst';b.style.cssText=`left:${e.clientX}px;top:${e.clientY}px;background:rgba(${cs[~~(Math.random()*cs.length)]},0.9);--dx:${Math.cos(ang)*d}px;--dy:${Math.sin(ang)*d}px;box-shadow:0 0 5px rgba(200,146,58,.5);`;document.body.appendChild(b);setTimeout(()=>b.remove(),700);}});
 
-function triggerLightning() {
-  lctx.clearRect(0, 0, lcanvas.width, lcanvas.height);
-  const x = Math.random() * lcanvas.width;
-  lctx.strokeStyle = `rgba(255,${150+Math.random()*100},0,0.9)`;
-  lctx.lineWidth = 1.5;
-  lctx.shadowBlur = 20;
-  lctx.shadowColor = '#FF8C00';
-  drawBolt(x, 0, x + (Math.random()-0.5)*200, lcanvas.height * 0.6, 120, 4);
-  lcanvas.style.opacity = '1';
-  setTimeout(() => { lcanvas.style.opacity = '0'; lctx.clearRect(0,0,lcanvas.width,lcanvas.height); }, 120);
-  setTimeout(() => {
-    lctx.clearRect(0,0,lcanvas.width,lcanvas.height);
-    lctx.shadowBlur = 30;
-    drawBolt(x, 0, x + (Math.random()-0.5)*150, lcanvas.height * 0.5, 80, 3);
-    lcanvas.style.opacity = '0.7';
-    setTimeout(() => { lcanvas.style.opacity = '0'; lctx.clearRect(0,0,lcanvas.width,lcanvas.height); }, 80);
-  }, 200);
-  setTimeout(triggerLightning, 4000 + Math.random() * 8000);
-}
-setTimeout(triggerLightning, 3000);
+/* ── SMOOTH SCROLL ── */
+document.querySelectorAll('a[href^="#"]').forEach(a=>a.addEventListener('click',e=>{const t=document.querySelector(a.getAttribute('href'));if(t){e.preventDefault();t.scrollIntoView({behavior:'smooth'});}}));
 
-// ═══════════════════════════════════════════════
-//  FLOATING RUNES
-// ═══════════════════════════════════════════════
-const RUNES = ['⚔','🔥','☽','✦','◆','⚡','☠','🌀','⚜','✸'];
-for (let i = 0; i < 12; i++) {
-  const r = document.createElement('div');
-  r.className = 'rune';
-  r.textContent = RUNES[Math.floor(Math.random() * RUNES.length)];
-  r.style.left = Math.random() * 100 + 'vw';
-  r.style.animationDuration = (14 + Math.random() * 20) + 's';
-  r.style.animationDelay = (Math.random() * 15) + 's';
-  r.style.fontSize = (10 + Math.random() * 10) + 'px';
-  r.style.opacity = (0.1 + Math.random() * 0.2).toString();
-  document.body.appendChild(r);
-}
+/* ── NOTIFY ── */
+document.getElementById('notifyBtn').addEventListener('click',()=>{const i=document.querySelector('.cs-inp');if(i.value.includes('@')){const b=document.getElementById('notifyBtn');b.textContent='✓ Saved!';b.style.background='linear-gradient(135deg,#22FF88,#00CC66)';i.value='';i.placeholder="You're on the list 🔥";}});
 
-// ═══════════════════════════════════════════════
-//  LAVA CRACK FLASHES ON HERO
-// ═══════════════════════════════════════════════
-const hero = document.querySelector('.hero');
-if (hero) {
-  const crackContainer = document.createElement('div');
-  crackContainer.className = 'lava-cracks';
-  hero.appendChild(crackContainer);
-  for (let i = 0; i < 6; i++) {
-    const c = document.createElement('div');
-    c.className = 'crack';
-    const w = 60 + Math.random() * 200;
-    const h = 1 + Math.random() * 2;
-    c.style.cssText = `
-      left:${Math.random()*80}%;
-      top:${Math.random()*100}%;
-      width:${w}px;
-      height:${h}px;
-      --angle:${Math.random()*60-30}deg;
-      --dur:${5+Math.random()*8}s;
-      --delay:${Math.random()*6}s;
-      transform:rotate(${Math.random()*40-20}deg);
-    `;
-    crackContainer.appendChild(c);
-  }
-}
-
-// ═══════════════════════════════════════════════
-//  SCROLL REVEAL
-// ═══════════════════════════════════════════════
-const revealEls = document.querySelectorAll('.reveal, .reveal-left, .reveal-right');
-const revealObs = new IntersectionObserver(entries => {
-  entries.forEach((en, idx) => {
-    if (en.isIntersecting) {
-      setTimeout(() => en.target.classList.add('visible'), 60);
-      revealObs.unobserve(en.target);
-    }
+/* ── LOAD EVENTS FROM STORAGE ── */
+const DEFAULT_EVENTS=[
+  {time:'🔴 Live Now',title:'Boss Raid — Dark Dragon',desc:'Team up and bring down the Dark Dragon in Chaos Dungeon. Top damage dealers take the crown.',reward:'⚔ Dragon Armor Set + 50,000 Gold',status:'live'},
+  {time:'⏰ Every Weekend',title:'PvP Colosseum',desc:'Bracket tournament open to all ASIA 1 players. Fight for ranking, glory and prizes.',reward:'⚔ Tournament Medal + Cash Prize',status:'active'},
+  {time:'📅 Daily',title:'Daily Quest Bonanza',desc:'Complete daily missions for Event Tokens, EXP boosts and rare item fragments.',reward:'⚔ Event Tokens + EXP Boost ×2',status:'active'},
+  {time:'📅 Monthly',title:'Top Hunter Ranking',desc:'The 10 elite hunters each month receive legendary weapons and a massive gold reward.',reward:'⚔ Legendary Weapon + 200,000 Gold',status:'active'},
+  {time:'🔥 Every Friday',title:'Guild War Siege',desc:'Guilds clash for control of the Sacred Castle. The ruling guild collects taxes all week.',reward:'⚔ Castle Control + Guild Buffs',status:'active'},
+  {time:'🟡 Ongoing',title:'Referral Campaign',desc:'Invite warriors and earn tokens for every active recruit. No cap on your earnings.',reward:'⚔ 1,000 Tokens per Active Recruit',status:'active'}
+];
+const DELAY_CLASSES=['d1','d2','d3','d4','d5','d6'];
+function renderEvents(){
+  const raw=localStorage.getItem('babyran_events');
+  const events=raw?JSON.parse(raw):DEFAULT_EVENTS;
+  const grid=document.getElementById('eventsGrid');
+  grid.innerHTML='';
+  events.forEach((ev,i)=>{
+    if(ev.status==='hidden') return;
+    const d=DELAY_CLASSES[i%6];
+    const div=document.createElement('div');
+    div.className=`ec rev ${d}`;
+    div.innerHTML=`<span class="ev-time">${ev.time}</span><h3 class="ev-t">${ev.title}</h3><p class="ev-d">${ev.desc}</p><div class="ev-rew">${ev.reward}</div>`;
+    grid.appendChild(div);
   });
-}, { threshold: 0.12 });
-revealEls.forEach(el => revealObs.observe(el));
-
-// ═══════════════════════════════════════════════
-//  BUTTON CLICK PARTICLE BURST
-// ═══════════════════════════════════════════════
-document.querySelectorAll('.btn-fire, .srv-btn, .dl-btn, .nav-cta').forEach(btn => {
-  btn.addEventListener('click', e => {
-    for (let i = 0; i < 16; i++) {
-      const p = document.createElement('div');
-      p.className = 'burst-particle';
-      const angle = (i / 16) * Math.PI * 2;
-      const dist = 40 + Math.random() * 60;
-      p.style.cssText = `
-        left:${e.clientX}px;
-        top:${e.clientY}px;
-        background:${['#FF6B00','#FFB300','#FF3D00','#FFD700'][Math.floor(Math.random()*4)]};
-        --bx:${Math.cos(angle)*dist}px;
-        --by:${Math.sin(angle)*dist}px;
-        box-shadow:0 0 6px rgba(255,107,0,0.8);
-      `;
-      document.body.appendChild(p);
-      setTimeout(() => p.remove(), 800);
-    }
-  });
-});
-
-// ═══════════════════════════════════════════════
-//  MOUSE PARALLAX ON HERO LOGO
-// ═══════════════════════════════════════════════
-const heroLogo = document.querySelector('.hero-logo');
-document.addEventListener('mousemove', e => {
-  if (!heroLogo) return;
-  const rx = (e.clientX / window.innerWidth - 0.5) * 12;
-  const ry = (e.clientY / window.innerHeight - 0.5) * 8;
-  heroLogo.style.transform = `translateY(${Math.sin(Date.now()/1000)*8}px) rotateX(${-ry}deg) rotateY(${rx}deg)`;
-});
-
-// ═══════════════════════════════════════════════
-//  HOVER FLAME EFFECT ON CARDS
-// ═══════════════════════════════════════════════
-document.querySelectorAll('.p2e-card, .ev-card, .srv-card').forEach(card => {
-  card.addEventListener('mousemove', e => {
-    const rect = card.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width) * 100;
-    const y = ((e.clientY - rect.top) / rect.height) * 100;
-    card.style.background = card.style.background || '';
-    card.style.setProperty('--mx', x + '%');
-    card.style.setProperty('--my', y + '%');
-  });
-});
-
-// ═══════════════════════════════════════════════
-//  SMOOTH SCROLL
-// ═══════════════════════════════════════════════
-document.querySelectorAll('a[href^="#"]').forEach(a => {
-  a.addEventListener('click', e => {
-    const t = document.querySelector(a.getAttribute('href'));
-    if (t) { e.preventDefault(); t.scrollIntoView({ behavior: 'smooth' }); }
-  });
-});
-
-// ═══════════════════════════════════════════════
-//  COUNT-UP ANIMATION
-// ═══════════════════════════════════════════════
-const countEls = document.querySelectorAll('[data-count]');
-const io = new IntersectionObserver(entries => {
-  entries.forEach(en => {
-    if (en.isIntersecting) {
-      const el = en.target;
-      const target = parseInt(el.dataset.count);
-      const dur = 1600;
-      const t0 = performance.now();
-      const tick = now => {
-        const prog = Math.min((now - t0) / dur, 1);
-        const ease = 1 - Math.pow(1 - prog, 3);
-        el.textContent = Math.floor(ease * target).toLocaleString() + '+';
-        if (prog < 1) requestAnimationFrame(tick);
-      };
-      requestAnimationFrame(tick);
-      io.unobserve(el);
-    }
-  });
-}, { threshold: 0.5 });
-countEls.forEach(el => io.observe(el));
-
-// ═══════════════════════════════════════════════
-//  NOTIFY BUTTON
-// ═══════════════════════════════════════════════
-const notifyBtn = document.querySelector('.notify-btn');
-if (notifyBtn) {
-  notifyBtn.addEventListener('click', () => {
-    const input = document.querySelector('.notify-input');
-    if (input && input.value.includes('@')) {
-      notifyBtn.textContent = '✔ Noted!';
-      notifyBtn.style.background = 'linear-gradient(135deg,#00C853,#00E676)';
-      input.value = '';
-      input.placeholder = 'You\'ll be the first to know! 🔥';
-    } else {
-      notifyBtn.textContent = 'Invalid!';
-      setTimeout(() => notifyBtn.textContent = 'Notify Me', 1500);
-    }
+  // re-observe new elements
+  document.querySelectorAll('.ev-grid .rev').forEach(el=>{
+    el.classList.remove('in');
+    obs.observe(el);
   });
 }
+renderEvents();
+window.addEventListener('storage',e=>{if(e.key==='babyran_events') renderEvents();});
 </script>
 </body>
 </html>
