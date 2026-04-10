@@ -1,240 +1,486 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Admin - Boss Settings</title>
-    <style>
-        body {
-            background: #0f1215;
-            color: white;
-            font-family: sans-serif;
-            text-align: center;
-            padding: 20px;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin — Ymir Boss Tracker</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Share+Tech+Mono&family=Barlow+Condensed:wght@400;600;700&display=swap" rel="stylesheet">
 
-        .box {
-            background: #1c2126;
-            border: 1px solid #343b42;
-            padding: 20px;
-            border-radius: 10px;
-            max-width: 520px;
-            margin: 20px auto;
-        }
+  <style>
+    :root {
+      --gold: #d4af37;
+      --gold-dim: rgba(212,175,55,0.12);
+      --dark-bg: #080b0e;
+      --card-bg: #111519;
+      --border: #252d35;
+      --border-bright: #3a4450;
+      --red: #e74c3c;
+      --red-dim: rgba(231,76,60,0.1);
+      --green: #2ecc71;
+      --blue: #3498db;
+      --text-gray: #667788;
+      --text-dim: #445566;
+    }
 
-        select, input {
-            padding: 10px;
-            width: 90%;
-            border-radius: 5px;
-            border: 1px solid #d4af37;
-            background: #000;
-            color: white;
-            margin-bottom: 10px;
-        }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
-        button {
-            padding: 12px;
-            background: #d4af37;
-            border: none;
-            cursor: pointer;
-            font-weight: bold;
-            border-radius: 5px;
-            width: 95%;
-            margin-top: 5px;
-        }
+    body {
+      background: var(--dark-bg);
+      color: white;
+      font-family: 'Barlow Condensed', sans-serif;
+      min-height: 100vh;
+      padding: 0 0 60px;
+      background-image:
+        radial-gradient(ellipse 80% 40% at 50% -10%, rgba(212,175,55,0.05) 0%, transparent 60%);
+    }
 
-        .reset-btn {
-            background: #e74c3c;
-            color: white;
-            margin-top: 15px;
-        }
+    .header {
+      text-align: center;
+      padding: 40px 20px 30px;
+    }
 
-        .status {
-            margin-top: 10px;
-            font-size: 0.9rem;
-            font-weight: bold;
-        }
+    h1 {
+      font-family: 'Cinzel', serif;
+      color: var(--gold);
+      font-size: clamp(1.2rem, 3vw, 1.8rem);
+      letter-spacing: 5px;
+      text-transform: uppercase;
+    }
 
-        a {
-            color: #d4af37;
-            text-decoration: none;
-            display: block;
-            margin-top: 20px;
-        }
+    .subtitle {
+      font-size: 0.7rem;
+      color: var(--text-gray);
+      letter-spacing: 4px;
+      margin-top: 6px;
+      text-transform: uppercase;
+    }
 
-        /* EMBED PREVIEW */
-        .embed-preview {
-            margin-top: 15px;
-            padding: 15px;
-            border-left: 5px solid #d4af37;
-            background: rgba(255,255,255,0.05);
-            text-align: left;
-            border-radius: 8px;
-        }
+    .page {
+      max-width: 620px;
+      margin: 0 auto;
+      padding: 0 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
 
-        .embed-title {
-            font-weight: bold;
-            font-size: 1.05rem;
-            margin-bottom: 6px;
-            color: #f1c40f;
-        }
+    .box {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 26px 28px;
+    }
 
-        .embed-desc {
-            font-size: 0.95rem;
-            margin-bottom: 10px;
-        }
+    .box-title {
+      font-family: 'Cinzel', serif;
+      font-size: 0.8rem;
+      letter-spacing: 3px;
+      color: var(--gold);
+      text-transform: uppercase;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
 
-        .embed-field {
-            font-size: 0.85rem;
-            color: #ccc;
-        }
-    </style>
+    label {
+      display: block;
+      font-size: 0.75rem;
+      letter-spacing: 2px;
+      color: var(--text-gray);
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    select, input[type="number"] {
+      width: 100%;
+      padding: 11px 14px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: rgba(0,0,0,0.4);
+      color: white;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.9rem;
+      margin-bottom: 16px;
+      appearance: none;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    select:focus, input[type="number"]:focus {
+      border-color: var(--gold);
+    }
+
+    .field-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: 'Cinzel', serif;
+      font-size: 0.75rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      transition: all 0.2s;
+      margin-top: 4px;
+    }
+
+    .btn-gold  { background: var(--gold); color: #000; }
+    .btn-gold:hover { filter: brightness(1.15); }
+
+    .btn-red   { background: transparent; border: 1px solid var(--red); color: var(--red); }
+    .btn-red:hover { background: var(--red); color: white; }
+
+    .btn-blue  { background: transparent; border: 1px solid var(--blue); color: var(--blue); }
+    .btn-blue:hover { background: var(--blue); color: white; }
+
+    .status {
+      margin-top: 12px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.8rem;
+      min-height: 1.2em;
+      letter-spacing: 1px;
+    }
+
+    .status.ok  { color: var(--green); }
+    .status.err { color: var(--red); }
+    .status.pending { color: var(--gold); }
+
+    /* Live boss state table */
+    .boss-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.8rem;
+    }
+
+    .boss-table th {
+      text-align: left;
+      color: var(--text-gray);
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.7rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .boss-table td {
+      padding: 9px 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      color: #bbb;
+    }
+
+    .boss-table tr:last-child td { border-bottom: none; }
+    .boss-table .alive { color: var(--green); }
+    .boss-table .dead  { color: var(--red); }
+
+    .embed-preview {
+      margin-top: 16px;
+      padding: 16px;
+      border-left: 3px solid var(--gold);
+      background: rgba(255,255,255,0.03);
+      border-radius: 0 8px 8px 0;
+    }
+
+    .embed-preview .ep-title {
+      font-family: 'Cinzel', serif;
+      color: var(--gold);
+      font-size: 0.9rem;
+      margin-bottom: 6px;
+    }
+
+    .embed-preview .ep-body {
+      font-size: 0.85rem;
+      color: #bbb;
+      line-height: 1.5;
+    }
+
+    .back-link {
+      display: block;
+      text-align: center;
+      margin-top: 30px;
+      color: var(--text-dim);
+      font-size: 0.7rem;
+      letter-spacing: 3px;
+      text-decoration: none;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+    .back-link:hover { color: var(--text-gray); }
+
+    /* Respawn settings note */
+    .note {
+      font-size: 0.75rem;
+      color: var(--text-gray);
+      margin-top: -10px;
+      margin-bottom: 14px;
+      line-height: 1.5;
+    }
+  </style>
 </head>
+
 <body>
 
-<h1>⚙️ Admin Dashboard</h1>
-
-<!-- RESET BOX -->
-<div class="box">
-    <h3>🚨 Emergency Reset</h3>
-
-    <select id="resetFloor" onchange="updateBossList()">
-        <option value="floor1">Floor 1</option>
-        <option value="floor2">Floor 2</option>
-        <option value="floor3">Floor 3</option>
-        <option value="floor4">Floor 4</option>
-        <option value="mykriel">Mykriel</option>
-    </select>
-
-    <select id="resetBoss"></select>
-
-    <button class="reset-btn" onclick="resetBoss()">
-        RESET TIMER & DELETE RECORD
-    </button>
-
-    <div id="resetStatus" class="status"></div>
+<div class="header">
+  <h1>⚙ Admin Panel</h1>
+  <div class="subtitle">Legend of Ymir Boss Tracker</div>
 </div>
 
-<!-- SETTINGS BOX -->
-<div class="box">
-    <h3>System Settings</h3>
+<div class="page">
 
-    <input type="number" id="respawnMins" placeholder="Respawn Minutes (e.g. 120)">
-    <button onclick="saveTime()">Update Timer Settings</button>
+  <!-- ── EMERGENCY RESET ── -->
+  <div class="box">
+    <div class="box-title">🚨 Emergency Reset</div>
 
-    <!-- DISCORD EMBED PREVIEW -->
-    <h3 style="margin-top:20px;">Discord Test Embed Preview</h3>
-
-    <div class="embed-preview">
-        <div class="embed-title">⚠️ Boss Respawning Soon!</div>
-        <div class="embed-desc">
-            <b>TEST BOSS</b> will respawn in <b>2 minutes</b>!
-        </div>
-        <div class="embed-field">📍 Location: <b>ADMIN PANEL</b></div>
-        <div class="embed-field" style="margin-top:8px; color:#888;">
-            Footer: Legend of Ymir Boss Tracker
-        </div>
+    <div class="field-row">
+      <div>
+        <label>Floor / Area</label>
+        <select id="resetFloor" onchange="updateBossList()">
+          <option value="floor1">Floor 1</option>
+          <option value="floor2">Floor 2</option>
+          <option value="floor3">Floor 3</option>
+          <option value="floor4">Floor 4</option>
+          <option value="mykriel">Mykriel</option>
+        </select>
+      </div>
+      <div>
+        <label>Boss</label>
+        <select id="resetBoss"></select>
+      </div>
     </div>
 
-    <button style="background:#3498db; margin-top:15px;" onclick="testPing()">
-        Send Test Embed to Discord
-    </button>
+    <button class="btn btn-red" onclick="resetBoss()">Reset Timer — Mark Alive</button>
+    <div class="status" id="resetStatus"></div>
+  </div>
 
-    <div id="pingStatus" class="status"></div>
+  <!-- ── RESPAWN SETTINGS ── -->
+  <div class="box">
+    <div class="box-title">⏱ Respawn Timer Settings</div>
+
+    <label>Floor 1–4 Boss Respawn (minutes)</label>
+    <input type="number" id="floorRespawn" min="1" max="999" placeholder="120">
+
+    <p class="note">Default: 120 min. This will apply when marking floor bosses as killed.</p>
+
+    <label>Mykriel Boss Respawn (minutes)</label>
+    <input type="number" id="mykrielRespawn" min="1" max="999" placeholder="60" disabled>
+    <p class="note" style="margin-top:-12px;">Mykriel is locked at 60 min and cannot be changed.</p>
+
+    <button class="btn btn-gold" onclick="saveRespawnSettings()">Save Settings</button>
+    <div class="status" id="respawnStatus"></div>
+  </div>
+
+  <!-- ── LIVE BOSS STATE ── -->
+  <div class="box">
+    <div class="box-title">📋 Current Boss Timers</div>
+    <table class="boss-table" id="bossStateTable">
+      <thead>
+        <tr>
+          <th>Boss</th>
+          <th>Location</th>
+          <th>Status</th>
+          <th>Respawns At</th>
+        </tr>
+      </thead>
+      <tbody id="bossStateBody">
+        <tr><td colspan="4" style="color:var(--text-dim)">Loading...</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ── DISCORD TEST ── -->
+  <div class="box">
+    <div class="box-title">💬 Discord Integration</div>
+
+    <div class="embed-preview">
+      <div class="ep-title">⚠️ Boss Respawning Soon!</div>
+      <div class="ep-body">
+        <b>TEST BOSS</b> will respawn in <b>2 minutes</b>!<br>
+        <span style="color:var(--text-gray)">📍 Location: ADMIN PANEL</span>
+      </div>
+    </div>
+
+    <button class="btn btn-blue" style="margin-top:16px;" onclick="testDiscord()">
+      Send Test Embed to Discord
+    </button>
+    <div class="status" id="discordStatus"></div>
+  </div>
+
 </div>
 
-<p><a href="index.html">← Back to Tracker</a></p>
+<a href="index.html" class="back-link">← Back to Tracker</a>
 
 <script>
-    // ✅ Google Script URL
-    const GOOGLE_SCRIPT_URL =
-        "https://script.google.com/macros/s/AKfycbw4ie1gR4hr5yDlwBimiOPBNWTFFB08sv1aAnodEATR4O0Hk6jwg16otOr1l_7TCpol/exec";
+  // ============================================================
+  // CONFIG  (must match index.html exactly)
+  // ============================================================
+  const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw4ie1gR4hr5yDlwBimiOPBNWTFFB08sv1aAnodEATR4O0Hk6jwg16otOr1l_7TCpol/exec";
+  const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1492112844987174962/hZ5KZdgngs2QWr1WYBg5HoslSO--TRSTNBfpCO7DXowP97MuCB3tJXgfzq1a2w8d6EVr";
 
-    // Boss Lists
-    const floorBosses = ["Volva", "Berserker", "Warlord", "Skald"];
+  const FLOOR_BOSSES = ["Volva", "Berserker", "Warlord", "Skald"];
+  const FLOORS = ["floor1", "floor2", "floor3", "floor4"];
+  const MYKRIEL_BOSSES = ["66 CH1","66 CH2","67 CH1","67 CH2","68 CH1","68 CH2","69 CH1","69 CH2"];
 
-    const mykrielBosses = [
-        "66 CH1", "66 CH2",
-        "67 CH1", "67 CH2",
-        "68 CH1", "68 CH2",
-        "69 CH1", "69 CH2"
-    ];
+  // ============================================================
+  // RESPAWN SETTINGS  — stored with "ymir_respawn_*" keys
+  // index.html reads these before marking a boss killed
+  // ============================================================
+  const FLOOR_RESPAWN_KEY  = "ymir_respawn_floor";
+  const MYKRIEL_RESPAWN_KEY = "ymir_respawn_mykriel";
 
-    // Populate Boss Dropdown
-    function updateBossList() {
-        const floor = document.getElementById("resetFloor").value;
-        const bossSelect = document.getElementById("resetBoss");
+  function loadRespawnSettings() {
+    const floorVal = localStorage.getItem(FLOOR_RESPAWN_KEY) || "120";
+    document.getElementById("floorRespawn").value = floorVal;
+    document.getElementById("mykrielRespawn").value = "60";
+  }
 
-        bossSelect.innerHTML = "";
+  function saveRespawnSettings() {
+    const floorMins = parseInt(document.getElementById("floorRespawn").value);
 
-        let bossList = floor === "mykriel" ? mykrielBosses : floorBosses;
-
-        bossList.forEach(boss => {
-            let option = document.createElement("option");
-            option.value = boss;
-            option.textContent = boss;
-            bossSelect.appendChild(option);
-        });
+    if (isNaN(floorMins) || floorMins < 1) {
+      setStatus("respawnStatus", "❌ Enter a valid number of minutes.", "err");
+      return;
     }
 
-    // ✅ RESET BOSS (CORS SAFE)
-    function resetBoss() {
-        const boss = document.getElementById("resetBoss").value;
-        const floor = document.getElementById("resetFloor").value;
-        const status = document.getElementById("resetStatus");
+    localStorage.setItem(FLOOR_RESPAWN_KEY, floorMins.toString());
+    setStatus("respawnStatus", `✅ Floor respawn set to ${floorMins} min. Takes effect on next kill.`, "ok");
+  }
 
-        const id = `${floor}-${boss}`;
+  // ============================================================
+  // BOSS DROPDOWN
+  // ============================================================
+  function updateBossList() {
+    const floor = document.getElementById("resetFloor").value;
+    const sel = document.getElementById("resetBoss");
+    sel.innerHTML = "";
+    const list = floor === "mykriel" ? MYKRIEL_BOSSES : FLOOR_BOSSES;
+    list.forEach(b => {
+      const o = document.createElement("option");
+      o.value = b;
+      o.textContent = b;
+      sel.appendChild(o);
+    });
+  }
 
-        status.innerText = "Processing Reset...";
-        status.style.color = "#d4af37";
+  // ============================================================
+  // RESET BOSS
+  // ============================================================
+  function resetBoss() {
+    const boss  = document.getElementById("resetBoss").value;
+    const floor = document.getElementById("resetFloor").value;
+    const id    = `${floor}-${boss}`;
 
-        // Clear Local Timer
-        localStorage.removeItem(id);
+    // Clear localStorage timer (same key format as index.html)
+    localStorage.removeItem(`ymir_${id}`);
 
-        // Send Request (NO CORS)
-        fetch(GOOGLE_SCRIPT_URL, {
-            method: "POST",
-            mode: "no-cors",
-            body: JSON.stringify({
-                type: "RESET_BOSS",
-                boss: boss,
-                floor: floor
-            })
-        });
+    // Tell Google Sheet to delete record
+    fetch(GOOGLE_SCRIPT_URL, {
+      method: "POST",
+      mode: "no-cors",
+      body: JSON.stringify({ type: "RESET_BOSS", boss, floor })
+    });
 
-        status.innerText = `✅ Reset Sent: ${boss} (${floor}) is now ALIVE.`;
-        status.style.color = "#2ecc71";
-    }
+    setStatus("resetStatus", `✅ ${boss} (${floor.toUpperCase()}) is now ALIVE.`, "ok");
+    renderBossTable();
+  }
 
-    // ✅ TEST DISCORD EMBED (CORS SAFE)
-    function testPing() {
-        const pingStatus = document.getElementById("pingStatus");
+  // ============================================================
+  // DISCORD TEST
+  // ============================================================
+  function testDiscord() {
+    setStatus("discordStatus", "Sending...", "pending");
 
-        pingStatus.innerText = "Sending Test Embed...";
-        pingStatus.style.color = "#d4af37";
+    const payload = {
+      content: "@everyone",
+      embeds: [{
+        title: "⚠️ Boss Respawning Soon!",
+        color: 0xd4af37,
+        description: "**TEST BOSS** will respawn in **2 minutes**!",
+        fields: [{ name: "📍 Location", value: "ADMIN PANEL TEST", inline: true }],
+        footer: { text: "Legend of Ymir Boss Tracker — Test Ping" },
+        timestamp: new Date().toISOString()
+      }]
+    };
 
-        fetch(GOOGLE_SCRIPT_URL, {
-            method: "POST",
-            mode: "no-cors",
-            body: JSON.stringify({ type: "TEST_WEBHOOK" })
-        });
+    fetch(DISCORD_WEBHOOK_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    })
+    .then(r => {
+      if (r.ok || r.status === 204) {
+        setStatus("discordStatus", "✅ Test embed sent! Check Discord.", "ok");
+      } else {
+        setStatus("discordStatus", `❌ Discord returned ${r.status}`, "err");
+      }
+    })
+    .catch(() => setStatus("discordStatus", "❌ Network error — check webhook URL.", "err"));
+  }
 
-        pingStatus.innerText = "✅ Test Embed Sent! Check Discord.";
-        pingStatus.style.color = "#2ecc71";
-    }
+  // ============================================================
+  // LIVE BOSS TABLE
+  // ============================================================
+  function renderBossTable() {
+    const now = Date.now();
+    const rows = [];
 
-    // Save Respawn Setting
-    function saveTime() {
-        const mins = document.getElementById("respawnMins").value;
-        localStorage.setItem("respawn_setting", mins);
-        alert("Global timer set to " + mins + " minutes.");
-    }
+    FLOORS.forEach(f => {
+      FLOOR_BOSSES.forEach(b => {
+        const id = `${f}-${b}`;
+        const t = parseInt(localStorage.getItem(`ymir_${id}`));
+        const alive = !t || t <= now;
+        const clock = !alive ? new Date(t).toLocaleTimeString([], { hour:"2-digit", minute:"2-digit" }) : "─";
+        rows.push(`
+          <tr>
+            <td>${b}</td>
+            <td>${f.replace("floor","Floor ")}</td>
+            <td class="${alive ? "alive" : "dead"}">${alive ? "Alive" : "Dead"}</td>
+            <td>${clock}</td>
+          </tr>
+        `);
+      });
+    });
 
-    // Load Saved Timer
-    document.getElementById("respawnMins").value =
-        localStorage.getItem("respawn_setting") || 120;
+    MYKRIEL_BOSSES.forEach(b => {
+      const id = `mykriel-${b}`;
+      const t = parseInt(localStorage.getItem(`ymir_${id}`));
+      const alive = !t || t <= now;
+      const clock = !alive ? new Date(t).toLocaleTimeString([], { hour:"2-digit", minute:"2-digit" }) : "─";
+      rows.push(`
+        <tr>
+          <td>Mykriel ${b}</td>
+          <td>Mykriel</td>
+          <td class="${alive ? "alive" : "dead"}">${alive ? "Alive" : "Dead"}</td>
+          <td>${clock}</td>
+        </tr>
+      `);
+    });
 
-    // Run on Load
-    updateBossList();
+    document.getElementById("bossStateBody").innerHTML = rows.join("");
+  }
+
+  // ============================================================
+  // HELPERS
+  // ============================================================
+  function setStatus(id, msg, type) {
+    const el = document.getElementById(id);
+    el.textContent = msg;
+    el.className = `status ${type}`;
+  }
+
+  // ============================================================
+  // INIT
+  // ============================================================
+  updateBossList();
+  loadRespawnSettings();
+  renderBossTable();
+  setInterval(renderBossTable, 5000);
 </script>
-
 </body>
 </html>
