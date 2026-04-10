@@ -4,433 +4,724 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ymir Boss Tracker Pro</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Share+Tech+Mono&family=Barlow+Condensed:wght@400;600;700&display=swap" rel="stylesheet">
 
   <style>
     :root {
       --gold: #d4af37;
-      --dark-bg: #0f1215;
-      --card-bg: #1c2126;
-      --border: #343b42;
+      --gold-dim: rgba(212,175,55,0.15);
+      --dark-bg: #080b0e;
+      --card-bg: #111519;
+      --card-bg2: #161c22;
+      --border: #252d35;
+      --border-bright: #3a4450;
       --red: #e74c3c;
+      --red-dim: rgba(231,76,60,0.12);
       --green: #2ecc71;
-      --text-gray: #888;
+      --green-dim: rgba(46,204,113,0.12);
+      --text-gray: #667788;
+      --text-dim: #445566;
+      --cyan: #4fc3f7;
     }
 
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
     body {
-      background-color: var(--dark-bg);
+      background: var(--dark-bg);
       color: white;
-      font-family: sans-serif;
-      margin: 0;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+      font-family: 'Barlow Condensed', sans-serif;
+      min-height: 100vh;
+      padding: 0 0 60px;
+      background-image:
+        radial-gradient(ellipse 80% 40% at 50% -10%, rgba(212,175,55,0.06) 0%, transparent 60%),
+        repeating-linear-gradient(
+          0deg,
+          transparent,
+          transparent 40px,
+          rgba(255,255,255,0.012) 40px,
+          rgba(255,255,255,0.012) 41px
+        ),
+        repeating-linear-gradient(
+          90deg,
+          transparent,
+          transparent 40px,
+          rgba(255,255,255,0.012) 40px,
+          rgba(255,255,255,0.012) 41px
+        );
+    }
+
+    /* ── HEADER ── */
+    .header {
+      text-align: center;
+      padding: 40px 20px 30px;
+      position: relative;
     }
 
     h1 {
+      font-family: 'Cinzel', serif;
       color: var(--gold);
+      font-size: clamp(1.4rem, 4vw, 2.4rem);
+      letter-spacing: 6px;
       text-transform: uppercase;
-      letter-spacing: 3px;
-      margin-bottom: 10px;
+      text-shadow: 0 0 40px rgba(212,175,55,0.4);
     }
 
-    .sync-indicator {
-      font-size: 0.7rem;
+    .subtitle {
+      font-size: 0.75rem;
       color: var(--text-gray);
-      margin-bottom: 15px;
+      letter-spacing: 4px;
+      margin-top: 6px;
       text-transform: uppercase;
+    }
+
+    .sync-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      margin-top: 14px;
+      font-size: 0.7rem;
+      letter-spacing: 2px;
+      color: var(--text-gray);
+      text-transform: uppercase;
+    }
+
+    .sync-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 8px var(--green);
+      animation: pulse 2s ease-in-out infinite;
+      display: inline-block;
+    }
+
+    @keyframes pulse {
+      0%,100% { opacity:1; transform:scale(1); }
+      50% { opacity:0.4; transform:scale(0.7); }
+    }
+
+    /* ── DASHBOARD ── */
+    .dashboard {
+      width: 100%;
+      max-width: 960px;
+      margin: 0 auto 30px;
+      padding: 0 20px;
+    }
+
+    .dashboard-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-top: 2px solid var(--gold);
+      border-radius: 12px;
+      padding: 22px 26px;
+    }
+
+    .dashboard-title {
+      font-family: 'Cinzel', serif;
+      color: var(--gold);
+      font-size: 0.85rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    #next-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.95rem;
+    }
+
+    .spawn-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 16px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: rgba(0,0,0,0.3);
+      transition: border-color 0.2s;
+    }
+
+    .spawn-row:first-child {
+      border-color: var(--gold);
+      background: var(--gold-dim);
+    }
+
+    .spawn-rank {
+      color: var(--text-gray);
+      font-size: 0.8rem;
+      margin-right: 10px;
+    }
+
+    .spawn-row:first-child .spawn-rank { color: var(--gold); }
+
+    .spawn-name { font-weight: 600; color: white; }
+    .spawn-loc { color: var(--gold); font-size: 0.8rem; margin-left: 8px; }
+    .spawn-time-left { color: var(--text-gray); font-size: 0.85rem; }
+    .spawn-clock { color: var(--green); font-weight: 600; }
+
+    .no-cd {
+      color: var(--text-dim);
+      font-size: 0.9rem;
+      padding: 10px 0;
+      text-align: center;
+      letter-spacing: 2px;
+    }
+
+    /* ── TABS ── */
+    .tabs-wrapper {
+      width: 100%;
+      max-width: 960px;
+      margin: 0 auto 24px;
+      padding: 0 20px;
     }
 
     .tabs {
       display: flex;
-      gap: 10px;
-      margin-bottom: 20px;
+      gap: 6px;
       flex-wrap: wrap;
-      justify-content: center;
     }
 
     .tab-btn {
       background: var(--card-bg);
       border: 1px solid var(--border);
       color: var(--text-gray);
-      padding: 12px 24px;
+      padding: 10px 22px;
       cursor: pointer;
       border-radius: 6px;
-      font-weight: bold;
+      font-family: 'Cinzel', serif;
+      font-size: 0.75rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      transition: all 0.2s;
     }
+
+    .tab-btn:hover { border-color: var(--border-bright); color: #aaa; }
 
     .tab-btn.active {
       border-color: var(--gold);
       color: var(--gold);
-      background: rgba(212, 175, 55, 0.1);
+      background: var(--gold-dim);
+    }
+
+    /* ── FLOOR GRID ── */
+    #floors-container {
+      width: 100%;
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 0 20px;
     }
 
     .floor-content {
       display: none;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 20px;
-      width: 100%;
-      max-width: 1200px;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 16px;
     }
 
-    .floor-content.active {
-      display: grid;
-    }
+    .floor-content.active { display: grid; }
 
+    /* ── BOSS CARD ── */
     .boss-card {
       background: var(--card-bg);
       border: 1px solid var(--border);
       border-radius: 12px;
-      padding: 20px;
+      padding: 22px 18px 18px;
       text-align: center;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.3s, transform 0.2s;
     }
 
+    .boss-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: var(--border);
+      transition: background 0.3s;
+    }
+
+    .boss-card.alive::before { background: var(--green); }
+    .boss-card.counting::before { background: var(--gold); }
+
+    .boss-card:hover { transform: translateY(-2px); border-color: var(--border-bright); }
+
     .boss-name {
-      font-size: 1.4rem;
-      font-weight: bold;
+      font-family: 'Cinzel', serif;
+      font-size: 1.05rem;
+      letter-spacing: 2px;
+      color: #dde;
+      margin-bottom: 4px;
+    }
+
+    .boss-floor-label {
+      font-size: 0.7rem;
+      color: var(--text-dim);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin-bottom: 16px;
     }
 
     .timer {
-      font-size: 2.2rem;
-      font-family: monospace;
-      margin: 15px 0;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 1.7rem;
+      margin: 0 0 18px;
       color: var(--green);
+      letter-spacing: 1px;
+      min-height: 2.2rem;
     }
 
-    .timer.counting {
-      color: var(--gold);
-      font-weight: bold;
+    .timer.counting { color: var(--gold); }
+
+    .status-badge {
+      display: inline-block;
+      font-size: 0.65rem;
+      letter-spacing: 3px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      margin-bottom: 16px;
+      text-transform: uppercase;
+    }
+
+    .badge-alive {
+      background: var(--green-dim);
+      color: var(--green);
+      border: 1px solid rgba(46,204,113,0.3);
+    }
+
+    .badge-dead {
+      background: var(--red-dim);
+      color: var(--red);
+      border: 1px solid rgba(231,76,60,0.3);
     }
 
     .killed-btn {
       background: transparent;
       border: 1px solid var(--red);
       color: var(--red);
-      padding: 10px 20px;
+      padding: 10px;
       border-radius: 6px;
       cursor: pointer;
       width: 100%;
-      font-weight: bold;
+      font-family: 'Cinzel', serif;
+      font-size: 0.7rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      transition: all 0.2s;
     }
 
-    .killed-btn:hover {
-      background: var(--red);
-      color: white;
+    .killed-btn:hover { background: var(--red); color: white; }
+    .killed-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+    /* ── TOAST ── */
+    #toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--card-bg2);
+      border: 1px solid var(--gold);
+      color: var(--gold);
+      padding: 12px 28px;
+      border-radius: 8px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.85rem;
+      letter-spacing: 1px;
+      transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
+      z-index: 999;
+      pointer-events: none;
     }
+
+    #toast.show { transform: translateX(-50%) translateY(0); }
+
+    /* ── ADMIN LINK ── */
+    .admin-link {
+      display: block;
+      text-align: center;
+      margin-top: 40px;
+      color: var(--text-dim);
+      font-size: 0.7rem;
+      letter-spacing: 3px;
+      text-decoration: none;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+    .admin-link:hover { color: var(--text-gray); }
   </style>
 </head>
 
 <body>
 
-<h1>🔱 Legend of Ymir Boss Tracker 🔱</h1>
-<div class="sync-indicator">Discord + Respawn Alerts Enabled</div>
+<!-- HEADER -->
+<div class="header">
+  <h1>🔱 Legend of Ymir Boss Tracker</h1>
+  <div class="subtitle">Respawn Intelligence System</div>
+  <div class="sync-bar">
+    <span><span class="sync-dot"></span> Live Sync</span>
+    <span id="last-sync-label">Connecting...</span>
+    <span>Discord Alerts Active</span>
+  </div>
+</div>
 
 <!-- DASHBOARD -->
-<div id="next-dashboard" style="
-    width: 100%;
-    max-width: 900px;
-    margin-bottom: 25px;
-    padding: 15px;
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    background: rgba(212,175,55,0.05);
-">
-  <h2 style="color: var(--gold); margin: 0 0 10px;">
-    ⏳ Next Boss Spawn Order
-  </h2>
-
-  <div id="next-list" style="
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      font-family: monospace;
-      font-size: 1rem;
-      color: white;
-  ">
-    Loading...
+<div class="dashboard">
+  <div class="dashboard-card">
+    <div class="dashboard-title">⏳ Next Spawning Bosses</div>
+    <div id="next-list"><div class="no-cd">Loading boss data...</div></div>
   </div>
 </div>
 
 <!-- TABS -->
-<div class="tabs">
-  <button class="tab-btn active" onclick="showFloor('floor1')">Floor 1</button>
-  <button class="tab-btn" onclick="showFloor('floor2')">Floor 2</button>
-  <button class="tab-btn" onclick="showFloor('floor3')">Floor 3</button>
-  <button class="tab-btn" onclick="showFloor('floor4')">Floor 4</button>
-  <button class="tab-btn" onclick="showFloor('mykriel')">Mykriel</button>
+<div class="tabs-wrapper">
+  <div class="tabs" id="tab-bar">
+    <button class="tab-btn active" data-floor="floor1">Floor 1</button>
+    <button class="tab-btn" data-floor="floor2">Floor 2</button>
+    <button class="tab-btn" data-floor="floor3">Floor 3</button>
+    <button class="tab-btn" data-floor="floor4">Floor 4</button>
+    <button class="tab-btn" data-floor="mykriel">Mykriel</button>
+  </div>
 </div>
 
-<div id="floors-container" style="width:100%;"></div>
+<div id="floors-container"></div>
+<div id="toast"></div>
+
+<a href="admin.html" class="admin-link">⚙ Admin Panel</a>
 
 <script>
-  // ==============================
+  // ============================================================
   // CONFIG
-  // ==============================
-
+  // ============================================================
   const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw4ie1gR4hr5yDlwBimiOPBNWTFFB08sv1aAnodEATR4O0Hk6jwg16otOr1l_7TCpol/exec";
   const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1492112844987174962/hZ5KZdgngs2QWr1WYBg5HoslSO--TRSTNBfpCO7DXowP97MuCB3tJXgfzq1a2w8d6EVr";
+  const SYNC_INTERVAL_MS = 15000; // pull from Google Sheet every 15s
 
-  // Floors (2 hours respawn)
-  const bosses = ["Volva", "Berserker", "Warlord", "Skald"];
-  const floors = ["floor1", "floor2", "floor3", "floor4"];
+  const FLOOR_BOSSES = ["Volva", "Berserker", "Warlord", "Skald"];
+  const FLOORS = ["floor1", "floor2", "floor3", "floor4"];
+  const MYKRIEL_BOSSES = ["66 CH1","66 CH2","67 CH1","67 CH2","68 CH1","68 CH2","69 CH1","69 CH2"];
 
-  // Mykriel Bosses (8 Total, ALWAYS 1 hour respawn)
-  const mykrielBosses = [
-    "66 CH1", "66 CH2",
-    "67 CH1", "67 CH2",
-    "68 CH1", "68 CH2",
-    "69 CH1", "69 CH2"
-  ];
+  // ============================================================
+  // TIMER STATE  (single source of truth)
+  // Key = "floor-boss", value = unix ms when boss respawns
+  // ============================================================
+  const timers = {};
 
-  const container = document.getElementById("floors-container");
-
-  // ==============================
-  // DISCORD EMBED NOTIFICATION
-  // ==============================
-
-  function sendDiscordKillEmbed(bossName, floorName, respawnMinutes) {
-    const payload = {
-      content: "@everyone",
-      embeds: [{
-        title: "🔥 Boss Killed!",
-        description: `**${bossName}** has been defeated!`,
-        fields: [
-          { name: "📍 Location", value: floorName.toUpperCase(), inline: true },
-          { name: "⏳ Respawn", value: `${respawnMinutes} minutes`, inline: true }
-        ],
-        footer: { text: "Legend of Ymir Boss Tracker" },
-        timestamp: new Date().toISOString()
-      }]
-    };
-
-    fetch(DISCORD_WEBHOOK_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
+  function setTimer(id, respawnAt) {
+    timers[id] = respawnAt;
+    localStorage.setItem(`ymir_${id}`, respawnAt.toString());
   }
 
-  // ==============================
-  // UI GENERATION
-  // ==============================
-
-  // Floors 1–4
-  floors.forEach((floor, idx) => {
-    let div = document.createElement("div");
-    div.id = floor;
-    div.className = `floor-content ${idx === 0 ? "active" : ""}`;
-
-    bosses.forEach(boss => {
-      const bossId = `${floor}-${boss}`;
-      div.innerHTML += `
-        <div class="boss-card">
-          <div class="boss-name">${boss}</div>
-          <div class="timer" id="time-${bossId}">ALIVE</div>
-          <button class="killed-btn"
-            onclick="markKilled('${bossId}','${boss}','${floor}',120)">
-            MARK KILLED
-          </button>
-        </div>
-      `;
-    });
-
-    container.appendChild(div);
-  });
-
-  // Mykriel Section
-  let myDiv = document.createElement("div");
-  myDiv.id = "mykriel";
-  myDiv.className = "floor-content";
-
-  mykrielBosses.forEach(boss => {
-    const bossId = `mykriel-${boss}`;
-    myDiv.innerHTML += `
-      <div class="boss-card">
-        <div class="boss-name">Mykriel ${boss}</div>
-        <div class="timer" id="time-${bossId}">ALIVE</div>
-        <button class="killed-btn"
-          onclick="markKilled('${bossId}','${boss}','mykriel',60)">
-          MARK KILLED
-        </button>
-      </div>
-    `;
-  });
-
-  container.appendChild(myDiv);
-
-  // ==============================
-  // TAB SWITCHING
-  // ==============================
-
-  function showFloor(id) {
-    document.querySelectorAll(".floor-content").forEach(f =>
-      f.classList.remove("active")
-    );
-
-    document.querySelectorAll(".tab-btn").forEach(b =>
-      b.classList.remove("active")
-    );
-
-    document.getElementById(id).classList.add("active");
-    if (window.event) window.event.currentTarget.classList.add("active");
+  function clearTimer(id) {
+    delete timers[id];
+    localStorage.removeItem(`ymir_${id}`);
   }
 
-  // ==============================
-  // MARK KILLED (MYKRIEL HARD LOCK = 60 MIN)
-  // ==============================
-
-  function markKilled(id, bossName, floorName, respawnMinutes) {
-
-    // ✅ HARD LOCK: Mykriel always 1 hour only
-    if (floorName === "mykriel") {
-      respawnMinutes = 60;
+  function loadFromLocalStorage() {
+    for (const key in localStorage) {
+      if (key.startsWith("ymir_")) {
+        const id = key.slice(5);
+        const val = parseInt(localStorage.getItem(key));
+        if (!isNaN(val) && val > Date.now()) {
+          timers[id] = val;
+        } else {
+          localStorage.removeItem(key);
+        }
+      }
     }
+  }
 
-    const now = new Date();
-    const targetTime = now.getTime() + respawnMinutes * 60000;
+  // ============================================================
+  // GOOGLE SHEET SYNC  (read + write)
+  // ============================================================
+  async function syncFromSheet() {
+    try {
+      const res = await fetch(`${GOOGLE_SCRIPT_URL}?action=GET_ALL`, { mode: "cors" });
+      if (!res.ok) throw new Error("Network error");
+      const data = await res.json();
 
-    localStorage.setItem(id, targetTime.toString());
-    updateDisplay();
+      if (data && Array.isArray(data.bosses)) {
+        data.bosses.forEach(entry => {
+          const id = `${entry.floor}-${entry.boss}`;
+          const respawnAt = new Date(entry.respawnAt).getTime();
+          if (respawnAt > Date.now()) {
+            // Only update if remote is newer / local doesn't exist
+            if (!timers[id] || respawnAt > timers[id]) {
+              setTimer(id, respawnAt);
+            }
+          }
+        });
+      }
 
-    // Save to Google Sheet
+      document.getElementById("last-sync-label").textContent =
+        "Synced " + new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+    } catch (e) {
+      // Silent fail — local data still works
+      document.getElementById("last-sync-label").textContent = "Offline (local only)";
+    }
+  }
+
+  function writeToSheet(bossName, floorName, now, respawnMinutes) {
     fetch(GOOGLE_SCRIPT_URL, {
       method: "POST",
       mode: "no-cors",
       body: JSON.stringify({
+        type: "MARK_KILLED",
         boss: bossName,
         floor: floorName,
         time: now.toISOString(),
         respawn: respawnMinutes
       })
     });
-
-    // Discord Kill Alert
-    sendDiscordKillEmbed(bossName, floorName, respawnMinutes);
   }
 
-  // ==============================
-  // TIMER HANDLER
-  // ==============================
+  // ============================================================
+  // DISCORD
+  // ============================================================
+  function sendDiscordKill(bossName, floorName, respawnMinutes) {
+    const payload = {
+      content: "@everyone",
+      embeds: [{
+        title: "🔥 Boss Killed!",
+        color: 0xe74c3c,
+        description: `**${bossName}** has been defeated!`,
+        fields: [
+          { name: "📍 Location", value: floorName.toUpperCase(), inline: true },
+          { name: "⏳ Respawn In", value: `${respawnMinutes} minutes`, inline: true }
+        ],
+        footer: { text: "Legend of Ymir Boss Tracker" },
+        timestamp: new Date().toISOString()
+      }]
+    };
+    fetch(DISCORD_WEBHOOK_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    }).catch(() => {});
+  }
 
-  function handleTimer(id) {
-    const display = document.getElementById(`time-${id}`);
-    if (!display) return;
+  // Schedule a 2-minute warning
+  function scheduleDiscordWarning(bossName, floorName, respawnAt) {
+    const warnAt = respawnAt - 2 * 60 * 1000;
+    const delay = warnAt - Date.now();
+    if (delay > 0) {
+      setTimeout(() => {
+        const payload = {
+          content: "@everyone",
+          embeds: [{
+            title: "⚠️ Boss Respawning Soon!",
+            color: 0xd4af37,
+            description: `**${bossName}** will respawn in **2 minutes**!`,
+            fields: [{ name: "📍 Location", value: floorName.toUpperCase(), inline: true }],
+            footer: { text: "Legend of Ymir Boss Tracker" },
+            timestamp: new Date().toISOString()
+          }]
+        };
+        fetch(DISCORD_WEBHOOK_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        }).catch(() => {});
+      }, delay);
+    }
+  }
 
-    const now = new Date().getTime();
-    const saved = localStorage.getItem(id);
+  // ============================================================
+  // MARK KILLED
+  // ============================================================
+  function markKilled(id, bossName, floorName, respawnMinutes) {
+    if (floorName === "mykriel") {
+      respawnMinutes = 60;
+    } else {
+      // Read admin-configured respawn time if available
+      const saved = parseInt(localStorage.getItem("ymir_respawn_floor"));
+      if (!isNaN(saved) && saved > 0) respawnMinutes = saved;
+    }
 
-    if (saved) {
-      const diff = parseInt(saved) - now;
+    const now = new Date();
+    const respawnAt = now.getTime() + respawnMinutes * 60000;
 
-      if (diff > 0) {
-        const h = Math.floor(diff / 3600000);
-        const m = Math.floor((diff % 3600000) / 60000);
-        const s = Math.floor((diff % 60000) / 1000);
+    setTimer(id, respawnAt);
+    writeToSheet(bossName, floorName, now, respawnMinutes);
+    sendDiscordKill(bossName, floorName, respawnMinutes);
+    scheduleDiscordWarning(bossName, floorName, respawnAt);
 
-        display.innerHTML =
-          `${h}h ${m.toString().padStart(2, "0")}m ${s.toString().padStart(2, "0")}s`;
+    showToast(`${bossName} killed — respawns in ${respawnMinutes}m`);
+    updateDisplay();
+  }
 
-        display.classList.add("counting");
-      } else {
-        display.innerHTML = "ALIVE";
-        display.classList.remove("counting");
-      }
+  // ============================================================
+  // TOAST
+  // ============================================================
+  let toastTimer;
+  function showToast(msg) {
+    const t = document.getElementById("toast");
+    t.textContent = msg;
+    t.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove("show"), 3000);
+  }
+
+  // ============================================================
+  // BUILD UI
+  // ============================================================
+  const container = document.getElementById("floors-container");
+
+  function buildCard(bossId, bossDisplayName, floorLabel, respawnMins) {
+    const shortLabel = floorLabel === "mykriel" ? "Mykriel" : floorLabel.replace("floor", "Floor ");
+    return `
+      <div class="boss-card alive" id="card-${bossId}">
+        <div class="boss-name">${bossDisplayName}</div>
+        <div class="boss-floor-label">${shortLabel}</div>
+        <div class="timer" id="time-${bossId}">─</div>
+        <span class="status-badge badge-alive" id="badge-${bossId}">Alive</span>
+        <button class="killed-btn" id="btn-${bossId}"
+          onclick="markKilled('${bossId}','${bossDisplayName}','${floorLabel}',${respawnMins})">
+          Mark Killed
+        </button>
+      </div>
+    `;
+  }
+
+  FLOORS.forEach((floor, idx) => {
+    const div = document.createElement("div");
+    div.id = floor;
+    div.className = `floor-content ${idx === 0 ? "active" : ""}`;
+    FLOOR_BOSSES.forEach(boss => {
+      div.innerHTML += buildCard(`${floor}-${boss}`, boss, floor, 120);
+    });
+    container.appendChild(div);
+  });
+
+  const myDiv = document.createElement("div");
+  myDiv.id = "mykriel";
+  myDiv.className = "floor-content";
+  MYKRIEL_BOSSES.forEach(boss => {
+    myDiv.innerHTML += buildCard(`mykriel-${boss}`, `Mykriel ${boss}`, "mykriel", 60);
+  });
+  container.appendChild(myDiv);
+
+  // ============================================================
+  // TAB SWITCHING  (fixed)
+  // ============================================================
+  document.getElementById("tab-bar").addEventListener("click", e => {
+    const btn = e.target.closest(".tab-btn");
+    if (!btn) return;
+    const floor = btn.dataset.floor;
+
+    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+    document.querySelectorAll(".floor-content").forEach(f => f.classList.remove("active"));
+
+    btn.classList.add("active");
+    document.getElementById(floor).classList.add("active");
+  });
+
+  // ============================================================
+  // DISPLAY UPDATE
+  // ============================================================
+  function updateCardDisplay(id) {
+    const timerEl = document.getElementById(`time-${id}`);
+    const badgeEl = document.getElementById(`badge-${id}`);
+    const cardEl  = document.getElementById(`card-${id}`);
+    const btnEl   = document.getElementById(`btn-${id}`);
+    if (!timerEl) return;
+
+    const respawnAt = timers[id];
+    const now = Date.now();
+
+    if (respawnAt && respawnAt > now) {
+      const diff = respawnAt - now;
+      const h = Math.floor(diff / 3600000);
+      const m = Math.floor((diff % 3600000) / 60000);
+      const s = Math.floor((diff % 60000) / 1000);
+
+      timerEl.textContent = h > 0
+        ? `${h}h ${String(m).padStart(2,"0")}m ${String(s).padStart(2,"0")}s`
+        : `${String(m).padStart(2,"0")}m ${String(s).padStart(2,"0")}s`;
+
+      timerEl.className = "timer counting";
+      badgeEl.className = "status-badge badge-dead";
+      badgeEl.textContent = "Dead";
+      cardEl.className = "boss-card counting";
+      btnEl.disabled = true;
+    } else {
+      if (respawnAt && respawnAt <= now) clearTimer(id);
+      timerEl.textContent = "─";
+      timerEl.className = "timer";
+      badgeEl.className = "status-badge badge-alive";
+      badgeEl.textContent = "Alive";
+      cardEl.className = "boss-card alive";
+      btnEl.disabled = false;
     }
   }
 
   function updateDisplay() {
-    floors.forEach(f => bosses.forEach(b => handleTimer(`${f}-${b}`)));
-    mykrielBosses.forEach(b => handleTimer(`mykriel-${b}`));
+    FLOORS.forEach(f => FLOOR_BOSSES.forEach(b => updateCardDisplay(`${f}-${b}`)));
+    MYKRIEL_BOSSES.forEach(b => updateCardDisplay(`mykriel-${b}`));
+    updateDashboard();
   }
 
-  // ==============================
-  // DASHBOARD WITH EXACT SPAWN CLOCK
-  // ==============================
-
-  function updateNextSpawnDashboard() {
+  // ============================================================
+  // DASHBOARD
+  // ============================================================
+  function updateDashboard() {
+    const now = Date.now();
     let upcoming = [];
-    const now = new Date().getTime();
 
-    function pushBoss(id, name, loc) {
-      const saved = localStorage.getItem(id);
-      if (!saved) return;
-
-      const diff = parseInt(saved) - now;
-      if (diff > 0) {
-        upcoming.push({ name, location: loc, timeLeft: diff });
-      }
-    }
-
-    floors.forEach(f =>
-      bosses.forEach(b => pushBoss(`${f}-${b}`, b, f))
+    FLOORS.forEach(f =>
+      FLOOR_BOSSES.forEach(b => {
+        const id = `${f}-${b}`;
+        const t = timers[id];
+        if (t && t > now) upcoming.push({ id, name: b, loc: f, timeLeft: t - now, respawnAt: t });
+      })
     );
 
-    mykrielBosses.forEach(b =>
-      pushBoss(`mykriel-${b}`, `Mykriel ${b}`, "mykriel")
-    );
+    MYKRIEL_BOSSES.forEach(b => {
+      const id = `mykriel-${b}`;
+      const t = timers[id];
+      if (t && t > now) upcoming.push({ id, name: `Mykriel ${b}`, loc: "mykriel", timeLeft: t - now, respawnAt: t });
+    });
 
     upcoming.sort((a, b) => a.timeLeft - b.timeLeft);
 
-    const nextList = document.getElementById("next-list");
-
+    const el = document.getElementById("next-list");
     if (upcoming.length === 0) {
-      nextList.innerHTML = "No bosses currently on cooldown.";
+      el.innerHTML = `<div class="no-cd">All bosses currently alive — no cooldowns active</div>`;
       return;
     }
 
-    nextList.innerHTML = "";
+    el.innerHTML = upcoming.slice(0, 6).map((boss, i) => {
+      const m = Math.floor(boss.timeLeft / 60000);
+      const s = Math.floor((boss.timeLeft % 60000) / 1000);
+      const clock = new Date(boss.respawnAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+      const locLabel = boss.loc.replace("floor", "Floor ");
 
-    upcoming.slice(0, 5).forEach((boss, index) => {
-      const mins = Math.floor(boss.timeLeft / 60000);
-      const secs = Math.floor((boss.timeLeft % 60000) / 1000);
-
-      const spawnDate = new Date(now + boss.timeLeft);
-      const exactTime = spawnDate.toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit"
-      });
-
-      nextList.innerHTML += `
-        <div style="
-          padding: 12px;
-          border-radius: 10px;
-          border: 1px solid var(--border);
-          background: rgba(0,0,0,0.25);
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-        ">
+      return `
+        <div class="spawn-row">
           <div>
-            <b>#${index + 1} → ${boss.name}</b>
-            <span style="color: var(--gold);">
-              (${boss.location.toUpperCase()})
-            </span>
+            <span class="spawn-rank">#${i + 1}</span>
+            <span class="spawn-name">${boss.name}</span>
+            <span class="spawn-loc">${locLabel.toUpperCase()}</span>
             <br>
-            ⏳ ${mins}m ${secs}s left
+            <span class="spawn-time-left">⏳ ${m}m ${String(s).padStart(2,"0")}s remaining</span>
           </div>
-
-          <div style="font-size:0.9rem;color:var(--green);font-weight:bold;">
-            🕒 ${exactTime}
-          </div>
+          <span class="spawn-clock">🕒 ${clock}</span>
         </div>
       `;
-    });
+    }).join("");
   }
 
-  // ==============================
-  // RUN LOOP
-  // ==============================
-
-  setInterval(() => {
-    updateDisplay();
-    updateNextSpawnDashboard();
-  }, 1000);
-
-  window.onload = () => {
-    updateDisplay();
-    updateNextSpawnDashboard();
-  };
-
+  // ============================================================
+  // INIT
+  // ============================================================
+  loadFromLocalStorage();
+  updateDisplay();
+  syncFromSheet();
+  setInterval(updateDisplay, 1000);
+  setInterval(syncFromSheet, SYNC_INTERVAL_MS);
 </script>
 </body>
 </html>
